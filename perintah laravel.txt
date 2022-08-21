@@ -1,0 +1,55 @@
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication
+$ composer create-project laravel/laravel:^8.0 latihan1 //perintah untuk membuat folder laravel baru dengan versi 8
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication
+$ cd latihan1
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan make:controller ContohController --resource //membuat controller
+Controller created successfully.
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan make:migration create_pegawai_table
+Created Migration: 2022_08_16_005305_create_pegawai_table //membuat tabel baru
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan migrate  //setelah membuat tabel langsung jalankan fungsi itu untuk di tambahkan ke phpmyadmin(mysql)
+Migration table created successfully.
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan make:migration add_nip_pegawai_table
+Created Migration: 2022_08_16_010147_add_nip_pegawai_table //menambahkan nama kolom pada tabel pegawai
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ composer require doctrine/dbal //jika ingin mengupdate nama tabel dalam database harus/wajib menjalan fungsi itu dulu
+
+Publishing complete.
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan migrate
+Migrating: 2022_08_16_010147_add_nip_pegawai_table
+Migrated:  2022_08_16_010147_add_nip_pegawai_table (8,060.95ms)
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan make:model pegawai
+Model created successfully.
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan make:controller PegawaiController --resource
+Controller created successfully.
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan make:request PegawaiRequest //validasai inputan pada form crud di halaman tambah dan edit data
+Request created successfully.
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan make:migration add_foto_pada_pegawai_table
+Created Migration: 2022_08_16_055626_add_foto_pada_pegawai_table
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ php artisan migrate
+Migrating: 2022_08_16_055626_add_foto_pada_pegawai_table
+Migrated:  2022_08_16_055626_add_foto_pada_pegawai_table (1,342.34ms)
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1

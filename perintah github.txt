@@ -1,0 +1,38 @@
+Perintah untuk awal menyambungkan github ke komputer/laptop lalu kemudian upload filenya
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ git config --global user.name "isulalifajri" 
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ git config --global user.email "isulalifajri@gmail.com"
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ git init
+Initialized empty Git repository in D:/L_Aplication/latihan1/.git/
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
+$ git add .
+
+warning: LF will be replaced by CRLF in tests/Unit/ExampleTest.php.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in webpack.mix.js.
+The file will have its original line endings in your working directory
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1 (master)
+$ git commit -m "first commit"
+[master (root-commit) b6ea8b8] first commit
+ 127 files changed, 38598 insertions(+)
+ create mode 100644 .editorconfig
+ create mode 100644 .env.example
+ 
+ create mode 100644 webpack.mix.js
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1 (master)
+$ git branch -M main
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1 (main)
+$ git remote add origin https://github.com/isulalifajri/latatihan1-laravel8.git
+
+user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1 (main)
+$ git push -u origin main
+Enumerating objects: 159, done.
+
