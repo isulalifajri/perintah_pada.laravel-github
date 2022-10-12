@@ -10,7 +10,7 @@ $ php artisan make:controller ContohController --resource //membuat controller
 Controller created successfully.
 
 user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
-$ php artisan make:migration create_pegawai_table
+$ php artisan make:migration create_pegawai_table --create=pegawai
 Created Migration: 2022_08_16_005305_create_pegawai_table //membuat tabel baru
 
 user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
