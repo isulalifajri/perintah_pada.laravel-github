@@ -19,12 +19,16 @@ Migration table created successfully.
 
 user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
 $ php artisan make:migration add_nip_pegawai_table
+atau pakai perintah ini -> php artisan make:migration add_position_to_users_table --table=users
 Created Migration: 2022_08_16_010147_add_nip_pegawai_table //menambahkan nama kolom pada tabel pegawai
 
 user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
 $ composer require doctrine/dbal //jika ingin mengupdate nama tabel dalam database harus/wajib menjalan fungsi itu dulu
 
 Publishing complete.
+
+//membuat model dalam laravel 8
+php artisan make:model namamodel -m
 
 user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
 $ php artisan migrate
