@@ -36,3 +36,8 @@ user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1 (main)
 $ git push -u origin main
 Enumerating objects: 159, done.
 
+
+//membatalkan atau mengembalikan semua file yang sudah ter commit dengan git
+$ git revert -n
+
+
