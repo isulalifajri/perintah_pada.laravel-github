@@ -1,14 +1,25 @@
-animasi  hover :
+//animasi  hover :
 https://bbbootstrap.com/snippets/bootstrap-5-simple-card-hover-effects-50607616
 
 https://codepen.io/tag/text-animation
 
+//scrool fixed jquery
 
-admin bootstrap reference
+https://stackoverflow.com/questions/55238993/jquery-remove-fixed-class-when-scrolling-back-up
+
+//menuanimasijavascript
+https://alvarotrigo.com/blog/javascript-menus/
+
+//catatan penting frontend
+
+https://www.w3schools.com/howto/howto_js_tabs.asp
+
+
+//admin bootstrap reference
 
 https://demo.getstisla.com/index.html
 
-redirect .htacces laravel from http to https
+//redirect .htacces laravel from http to https
 
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
