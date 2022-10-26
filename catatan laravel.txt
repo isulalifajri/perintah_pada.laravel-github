@@ -3,6 +3,10 @@ https://bbbootstrap.com/snippets/bootstrap-5-simple-card-hover-effects-50607616
 
 https://codepen.io/tag/text-animation
 
+//untuk animasi from to css
+
+https://bennettfeely.com/clippy/
+
 //scrool fixed jquery
 
 https://stackoverflow.com/questions/55238993/jquery-remove-fixed-class-when-scrolling-back-up
