@@ -1,3 +1,13 @@
+//install laravel valet
+https://packagist.org/packages/cretueusebiu/valet-windows
+
+- composer require cretueusebiu/valet-windows -> install
+- ubah dns server
+- ubah port xampp config dari 80 ke 8080
+- valet install
+- cd ..
+- valet park -> selesai.
+
 //animasi  hover :
 https://bbbootstrap.com/snippets/bootstrap-5-simple-card-hover-effects-50607616
 
