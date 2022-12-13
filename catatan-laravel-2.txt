@@ -1,0 +1,76 @@
+//terminal
+//untuk crud database tanpa form di laravel
+- php artisan tinker
+//buat varibel
+ - $user = new App\Model\User;
+ - $user -> name = 'abc';
+ - $user ->email = 'abc@gmail.com'
+ - $user->password = bcrypt('12345') 
+ - $user->save()
+
+ - $user->all() //lihat isi tabel
+ 
+ - $user = new User //new isi tabel
+
+ - $user->find(2000)
+ - $user->findOrFail(2000)
+
+- Post::first() // menampilkan data yang pertama
+
+- Post::find(2) // menampilkan data post yang id nya 2
+
+- Post::pluck('title')  //menampilkan data berdasarkan kolom
+
+//jika tabel berelasi
+- Post::where('category_id', 1)->get()
+
+//end tinker
+
+//seeder/Databaseseeder
+ Post::create([
+  'name => 'abc',
+ 'email' => 'abc@gmail.com',
+'password' => bcrypt('12345')
+]);
+
+Category::create([
+  'name => 'web programming',
+ 'slug' => 'web-programming',
+]);
+
+ - php artisan db:seed //menjalankan seeder
+ - php artisan migrate:fresh --seed // menghapus dan menambah isi tabel
+ - php artisan make:controller NameController --resource --model=NameModel  //menghubungkan controller langsung ke model
+
+//faker
+- config -> app -> faker_locale ->ubah ke indonesia
+- php artisan make:factory PostFactory
+
+//n+1 problem
+- install library -> composer require itsgoingd/clockwork
+- install extensi ->clockwork
+- agar berubah dari lazi loading ke eager loading tambahkan ->with
+- "posts" => Post::with(['author', 'category'])->get()
+
+- lazy eager loading ->load
+- pindah with dari controller ke model
+
+//pagination
+- Provider -> AppServicesProvider
+- defaultnya laravel menggunakan tailwind
+- jika menggunakan bootstrap ubah  fungsi -> public function boot()
+- jadi gini -> Paginator::useBootstrap();
+- jangan lupa namespacenya juga di tambahin.
+
+//image-upload in laravel
+- php artisan storage:link
+
+//noted
+- php artisan route:list
+
+//middleware authorization
+- make middleware IsAdmin
+- create name middleware in kernel
+
+//Gate
+- ap -> provider
