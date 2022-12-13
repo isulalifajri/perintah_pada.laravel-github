@@ -73,4 +73,5 @@ Category::create([
 - create name middleware in kernel
 
 //Gate
-- ap -> provider
+- app -> provider
+
