@@ -40,4 +40,7 @@ Enumerating objects: 159, done.
 //membatalkan atau mengembalikan semua file yang sudah ter commit dengan git
 $ git revert -n
 
+//jika git remote already exist, jalankan perintah di bawah ini
+git remote rm origin
+
 
