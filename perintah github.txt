@@ -43,4 +43,7 @@ $ git revert -n
 //jika git remote already exist, jalankan perintah di bawah ini
 git remote rm origin
 
+//on branch main, jika nothing to commit, working tree clean
+ rm -rf .git
+
 
