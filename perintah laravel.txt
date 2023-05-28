@@ -9,6 +9,13 @@ user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
 $ php artisan make:controller ContohController --resource //membuat controller
 Controller created successfully.
 
+ jika berhubungan dengan database, jangan lupa buat model nya lebih dahulu baru kemudian buat controllernya
+- contohnya gini:
+- php artisan make:model -m Namemodel (-m di gunakan agar model terhubung langsung dengan migration)
+
+- jadi nanti kalau buat controllernya bisa langsung kita hubungakan ke modelnya, contohnya gini:
+- php artisan make:controller AbcController --resource --model=Namemodel (nah gitu)
+
 user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
 $ php artisan make:migration create_pegawai_table --create=pegawai
 Created Migration: 2022_08_16_005305_create_pegawai_table //membuat tabel baru
