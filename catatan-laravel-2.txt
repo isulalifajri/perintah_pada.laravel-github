@@ -21,6 +21,10 @@
 
 - Post::pluck('title')  //menampilkan data berdasarkan kolom
 
+- jika berhubungan dengan database, jangan lupa buat model nya lebih dahulu baru kemudian buat controllernya
+- contohnya gini:
+- php artisan make:model -m Namemodel (-m di gunakan agar model terhubung langsung dengan migration)
+
 //jika tabel berelasi
 - Post::where('category_id', 1)->get()
 
