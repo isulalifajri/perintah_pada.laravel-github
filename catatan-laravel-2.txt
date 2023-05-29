@@ -2,7 +2,7 @@
 //untuk crud database tanpa form di laravel
 - php artisan tinker
 //buat varibel
- - $user = new App\Model\User;
+ - $user = new App\Models\User;
  - $user -> name = 'abc';
  - $user ->email = 'abc@gmail.com'
  - $user->password = bcrypt('12345') 
