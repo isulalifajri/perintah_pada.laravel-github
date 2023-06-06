@@ -45,5 +45,12 @@ git remote rm origin
 
 //on branch main, jika nothing to commit, working tree clean
  rm -rf .git
+ 
+ //update file di github dengan git
+ - git clone https://github.com/username/projectmu.git
+ - git add .
+ - git commit -m 'update-github'
+ - git push origin master
+ - selesai..
 
 
