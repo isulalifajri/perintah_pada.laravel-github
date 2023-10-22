@@ -79,3 +79,8 @@ Category::create([
 //Gate
 - app -> provider
 
+//ubah timezone menjadi local di laravel
+pergi config -> app.php dan ubah timezone seperti di bawah ini :
+// 'timezone' => 'UTC',
+    'timezone' => 'Asia/Jakarta',
+
