@@ -73,14 +73,39 @@ Category::create([
 - php artisan route:list
 
 //middleware authorization
-- make middleware IsAdmin
+- make middleware IsAdmin -> php artisan make:middleware IsAdmin
+if(!auth()->check() || auth()->user()->role !== 'admin'){
+            // abort(403);
+            return redirect('/');
+        } //jangan lupa daftarkan nama middlewarenya di Kernel
 - create name middleware in kernel
-
+ protected $middlewareAliases = [
+....
+ 'admin' => \App\Http\Middleware\IsAdmin::class
+....
+];
 //Gate
-- app -> provider
+- app -> provider -> AppServiceProvide.php -> in public function boot
+Gate::define('admin', function(User $user){
+            return $user->role === 'admin';
+        });
 
 //ubah timezone menjadi local di laravel
 pergi config -> app.php dan ubah timezone seperti di bawah ini :
 // 'timezone' => 'UTC',
     'timezone' => 'Asia/Jakarta',
+
+
+//membuat tracker website dengan laravel
+return request()->userAgent(); //mendapatkan nama web browser
+return $_SERVER['REMOTE_ADDR']; //mendapat alamat ip web server -> return request()->ip();
+return request()->getClientIp(); // mendapatkan alamat ip client web server
+
+//get name browser in laravel
+link lengkap :
+https://panjeh.medium.com/laravel-detector-mobile-browser-name-version-platform-device-robot-crawler-user-language-8499bee7607c
+
+composer require jenssegers/agent -W 
+seterusnya ikuti perintah/cara-cara yang ada link di atas
+
 
