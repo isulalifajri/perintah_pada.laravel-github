@@ -108,4 +108,23 @@ https://panjeh.medium.com/laravel-detector-mobile-browser-name-version-platform-
 composer require jenssegers/agent -W 
 seterusnya ikuti perintah/cara-cara yang ada link di atas
 
+//generate data dalam tabel to pdf
+- composer require barryvdh/laravel-dompdf -> jalankan perintah tersebut
+ kemudian pada config/app.php tambahkan kode class di bawah ini
+'providers' => [
+	....
+	Barryvdh\DomPDF\ServiceProvider::class,
+],
+'aliases' => [
+	....
+	'PDF' => Barryvdh\DomPDF\Facade::class,
+]
+- kemudian jika kita ingin menggunakannya di controller tambahkan class ini di headernya
+-> use Barryvdh\DomPDF\Facade\Pdf;
+
+//perintah ini digunakan untuk menampilkan pdf pada browser
+$pdf = Pdf::loadView('pdf.invoice', $data); -> pdf namafolder, invoice namafile di dalam folder pdf
+return $pdf->download('invoice.pdf'); // ini di gunakan untuk sambil mendownloadnya
+return $pdf->stream(); -> jika hanya ingin menampilkannya gunakan perintah -> ini hanya menampilkannya tanpa mendownloadnya langsung.
+
 
