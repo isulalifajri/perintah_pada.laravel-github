@@ -72,13 +72,28 @@ Category::create([
 //noted
 - php artisan route:list
 
+//make softdelets in laravel
+pada model yang datanya ingin di tambahkan soft delets tambahkan class ini: 
+	use Illuminate\Database\Eloquent\SoftDeletes;
+dan di dalam class modelnya tambahkan ini :
+	use SoftDeletes;
+dalam controller
+$data->delete($category->id); -> melakukan softdelets
+$category = Category::onlyTrashed()->get(); -> memanggil data yang di softdeletes
+Category::withTrashed()->restore(); // restore all atau mengembalikan semua data yang tersoftdelets
+Category::withTrashed()->find($id)->restore(); // restore berdasarkan id atau mengembalikan data yang tersoftdelets berdasarkan id
+$data = Category::onlyTrashed()->find($id); -> memanggil data yang tersoftdelets berdasarkan id
+$data->forceDelete($data->id); -> menghapus data secara permanent
+
+
 //middleware authorization
 - make middleware IsAdmin -> php artisan make:middleware IsAdmin
+-> in public function handler fill this :
 if(!auth()->check() || auth()->user()->role !== 'admin'){
             // abort(403);
             return redirect('/');
         } //jangan lupa daftarkan nama middlewarenya di Kernel
-- create name middleware in kernel
+- create name middleware in kernel.php
  protected $middlewareAliases = [
 ....
  'admin' => \App\Http\Middleware\IsAdmin::class
