@@ -126,5 +126,23 @@ seterusnya ikuti perintah/cara-cara yang ada link di atas
 $pdf = Pdf::loadView('pdf.invoice', $data); -> pdf namafolder, invoice namafile di dalam folder pdf
 return $pdf->download('invoice.pdf'); // ini di gunakan untuk sambil mendownloadnya
 return $pdf->stream(); -> jika hanya ingin menampilkannya gunakan perintah -> ini hanya menampilkannya tanpa mendownloadnya langsung.
+-> menampilkan gambar pada render dompdf laravel :
+<img src="{{ public_path('asset/img/nameimage.png') }}" height="50" alt="icon">.
+jangan lupa di php.ini extension=gd di aktifkan atau hilangkan titik koma di bagian depanya.
+from this ;extension=gd change to -> extension=gd
+
+
+// Menambahkan laravel auditing 
+Referensi Link :
+1. https://laravel-auditing.com/guide/installation.html
+2. https://dev.to/dendihandian/tracking-change-activities-using-laravel-audit-5ffg
+3. https://medium.com/@santhoshj/wherever-there-are-entities-with-multiple-states-we-would-need-to-keep-track-of-the-changes-made-7d8072f9cefc
+
+//Menambahkan laravel activity log
+Referensi Link :
+1. https://github.com/spatie/laravel-activitylog
+2. https://divisidev.com/post/laravel-activity-log
+3. https://spatie.be/docs/laravel-activitylog/v4/installation-and-setup
+
 
 
