@@ -72,6 +72,9 @@ Category::create([
 //noted
 - php artisan route:list
 
+//send email laravel 10
+https://laravel-school.com/posts/how-to-send-email-in-laravel-10/
+
 //make softdelets in laravel
 pada model yang datanya ingin di tambahkan soft delets tambahkan class ini: 
 	use Illuminate\Database\Eloquent\SoftDeletes;
