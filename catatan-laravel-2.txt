@@ -74,6 +74,7 @@ Category::create([
 
 //send email laravel 10
 https://laravel-school.com/posts/how-to-send-email-in-laravel-10/
+https://www.itsolutionstuff.com/post/laravel-10-mail-laravel-10-send-mail-tutorialexample.html
 
 //make softdelets in laravel
 pada model yang datanya ingin di tambahkan soft delets tambahkan class ini: 
