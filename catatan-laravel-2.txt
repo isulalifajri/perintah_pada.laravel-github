@@ -104,6 +104,7 @@ if(!auth()->check() || auth()->user()->role !== 'admin'){
 ....
 ];
 //Gate
+use Illuminate\Support\Facades\Gate;
 - app -> provider -> AppServiceProvide.php -> in public function boot
 Gate::define('admin', function(User $user){
             return $user->role === 'admin';
