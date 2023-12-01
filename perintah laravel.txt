@@ -32,6 +32,10 @@ Created Migration: 2022_08_16_010147_add_nip_pegawai_table //menambahkan nama ko
 user@DESKTOP-02T7M1F MINGW64 /d/L_Aplication/latihan1
 $ composer require doctrine/dbal //jika ingin mengupdate nama tabel dalam database harus/wajib menjalan fungsi itu dulu
 
+//perintah untuk menentukan nilai type data string /varchar di laravel secara manual
+$table->string('name', 191);
+
+
 Publishing complete.
 
 //membuat model dalam laravel 8
