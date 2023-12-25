@@ -48,3 +48,16 @@ kalau misalkan 1 category hanya boleh miliki satu product maka menggunakan hasOn
 
 1 postingan hanya memiliki satu user -> one to one -> in laravel => belongsTo
 1 user dapat memiliki banyak postingan -> one to many in laravel => hasMany
+
+
+-- contoh ketiga dengan tiga tabel -> postingan, comments, user
+
+//cardinalitasnya
+
+- 1 postingan dapat memiliki banyak comments -> one to many -> in laravel => hasMany
+- 1 comments hanya ada di satu postingan -> one to one -> in laravel => belongsTo
+yang di atas artinya meskipun komentarnya sama tapi id nya berbeda, jadi itu termasuk hal berbeda lagi dari comments sebelumnya
+- 1 comments hanya di tulis oleh satu user  -> one to one -> in laravel => belongsTo
+- 1 user dapat menulis banyak comments -> one to many -> in laravel =. hasMany
+
+jadi, tabel di atas saling berelasi, postingan berelasi ke comments dan comments berelasi ke user
