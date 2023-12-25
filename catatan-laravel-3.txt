@@ -46,5 +46,5 @@ kalau misalkan 1 category hanya boleh miliki satu product maka menggunakan hasOn
 
 - contoh yang kedua, terdapat 2 tabel -> postingan dan user
 
-1 postingan hanya memiliki satu user -> one to one
-1 user dapat memiliki banyak postingan -> one to many
+1 postingan hanya memiliki satu user -> one to one -> in laravel => belongsTo
+1 user dapat memiliki banyak postingan -> one to many in laravel => hasMany
