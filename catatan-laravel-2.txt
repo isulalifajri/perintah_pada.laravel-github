@@ -65,6 +65,7 @@ Category::create([
 - jika menggunakan bootstrap ubah  fungsi -> public function boot()
 - jadi gini -> Paginator::useBootstrap();
 - jangan lupa namespacenya juga di tambahin.
+- di blade tambahkan ini : {{ $datapagination->links('pagination::bootstrap-5') }}
 
 //image-upload in laravel
 - php artisan storage:link
