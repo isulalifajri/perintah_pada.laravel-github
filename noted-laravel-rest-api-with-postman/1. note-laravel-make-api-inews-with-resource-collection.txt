@@ -1,0 +1,224 @@
+- install postman
+- install laravel
+- buat database dan jangan lupa databasenya di tuliskan di  dalam .env laravel
+- buat table users, posts, comments dalam migration
+ dan relasikan tabel post ke user, table comment ke user dan post
+- buat isi tabel nya melalui database seeder 
+- buka postman, buat collection baru, lalu kemudian buat folder post
+- klik kanan dan add request dan namakan/rename filenya sesuai dengan method yang akan kita gunakan, contoh : Get Post List 
+- untuk memanggil data pilih method get, dan masukkan url yang ingin kita ambil datanya. contoh : http://127.0.0.1
+- klik send untuk memanggil datanya, jika muncul port 200 dan bodynya ada isinya, berarti sudah benar.
+- untuk mempermudah agar url yang di masukkan tidak berulang-ulang atau url yang sama di masukkan berulang-ulang pada method yang kita inginkan, kita bisa buat variabel environmentnya.
+- pada pojok kanan atas di tulisan no environment, disebelah kanannya lagi pad icon kotak dan mata klik dan add, nanti akan muncul beberapa tabel untuk kita membuat varibel.
+- jangan lupa rename dulu namanya sesuai dengan kita inginkan
+- isikan atribut variable pada add new variable dengan variable yang kita inginkan. contoh url, type:values, pada initial value isikan nama url nya ingin kita buat variable nya. contoh url : http://127.0.0.1
+- untuk current value akan otomatis terisi sesuai dengan url yang di masukkan dalam initial value.
+- simpan varibel yang telah kita buat.
+- dan selanjutnya di method get, post, put, delete, kita tidak perlu lagi memanggil/memasukkan link seperti ini -> http://127.0.0.1, kita hanya tinggal memanggil variable yang telah kita buat tadi.
+- seperti ini cara memanggilanya {{url}}, itu sama dengan http://127.0.0.1 sesuai dengan inital dan current value yang kita masukkan saat membuat variblenya.
+- untuk mengakses data dari laravel, maka kita harus membuat routenya di routes -> api.php
+
+- buat route seperti ini untuk contoh :
+Route::get('/posts'. function() {
+   dd('tes');
+});
+
+- untuk menampilkan hasilnya kita kembali lagi ke postman, pada method/request get yang telah kita buat, masukkan urlnya untuk memanggil hasilnya.
+contoh : {{url}}/api/posts
+- /posts harus sesuai dengan nama route yang kita buat di laravel routes api
+-jika muncul hasil dumpnya berarti sudah benar
+- perhatikan jika memasukkan alamat url pada varibale url yang kita buat di initalnya dengan seperti ini  : http://127.0.0.1/
+- maka pemanggilan di get seperti ini {{url}}api/posts
+- namun jika kalian memasukkan urlnya seperti ini : http://127.0.0.1 tanpa garis miring di belakangnya, maka pemanggilan di get seperti ini : {{url}}/api/posts
+- agar route /api tidak selalu di ketik saat melakukan send request pada masing-masing method yang telah kita buat, maka edit environmet yang telah kita buat dan ubah initial urlnya dari yang awalnya seperti : http://127.0.0.1 menjadi http://127.0.0.1/api 
+- jadi nanti di send request nya hanya memasukkan perintah ini -> {{url}}/posts
+- perlu di perhatikan saat membuat routes get di api, maka pemanggilan di postman methodnya juga harus get
+
+
+- yang tadi hanya contoh, sekarang kita praktek bagaimana cara menampilkan data dari database, pertama ubah route di api.php jadi seperti ini -> 
+    Route::get('/posts', [Postcontroller::class, 'index']);
+- lalu buat controller nya contoh : PostController 
+- lalu untuk memanggil data dari database pada function index di controller kita ubah datanya menjadi json, seperti contoh di bawah ini :
+    $posts = Post::all();
+//return response()->json($posts);
+return response()->json(['data' => $posts]); //data digunakan untuk menampung hasil api
+-> penyebutannya nanti jadi object, data, array
+- untuk melihat hasilnya, kembali ke postman dan lakukan send request pada method get
+- dan itulah tugas backend. selanjutnya tugas fronted untuk menampilkannya di website
+
+
+jangan lupa di bagian header->button menu landing pada masing-masing get request tambahkan ini di tabelnya
+di atribut Key -> Accept
+lalu value -> application/json
+
+
+//API Resource (Collection) Laravel
+- install api resource
+
+php artisan make:resource PostResource
+
+- nah sekarang sudah ada file resource yang telah kita buat di app->https->resource
+- coba ubah yang di controller dari
+ini -> return response()->json(['data' => $posts]);
+menjadi -> return PostResource::collection($posts);
+
+dan jalankan di postman. hasilnya akan tetap sama, bedanya kalau kita menggunakan Postresource kita tidak menuliskan key data di depan postnya seperti yang tertulis sebelumnya. key secara otomatis langsung ada.
+
+fungsi api resource membedakan hasil yang di berikan model ke bagian frontend, jadi bisa menentukan data mana yang akan di tampilkan ke frontend.
+
+secara default api resource menampilkan semua data yang di panggil dari model.
+
+caranya kita otak-atik aja return pada file PostResource seperti contoh di bawah ini :
+from this -> return parent::toArray($request);
+to this -> return [
+            'id' => $this->id,
+            'title' => $this->title
+        ]; //menampilkan hanya data id dan title
+
+melalui api resource kita juga menambahkan nilai di dalam return sesuai kemauan kita, yang mana nilai itu tidak ada di dalam database. 
+contohnya seperti di bawah ini.
+
+ $kamu = 'cantik';
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'kamu' => $kamu
+        ];
+
+contoh penggunaan api resource untuk custom returned data
+
+return [
+         'id' => $this->id,
+         'title' => $this->title,
+         'news_content' => $this->news_content,
+         'created_at' => date('Y-m-d H:i:s a', strtotime($this->created_at)) //mengubah format date time yang akan di tampilkan
+ 	//atau bisa menggunakan cara ini : date_format($this->created_ad, "Y/m/d H:i:s")
+        ]; //menampilkan data di frontend
+
+//tampilan untuk show detail
+- di route api buat ini 
+
+	Route::get('/posts/{id}', [Postcontroller::class, 'show']);
+
+- lalu di post controller buat function baru :
+
+	public function show($id){
+        	$post = Post::findOrFail($id);
+        	return response()->json(['data' => $post]);
+    	}
+
+- pada folder post yang kita buat, add request, rename filenya dengan nama show, method get , dan taruh url berikut ini 
+
+{{url}}/posts/2 //menampilkan data dengan id=2
+
+jika di postman format data nya begini
+
+"data" : {
+  "id": 2, 
+   dst
+ } //ini berarti bukan format array dan menampilkan hanya satu data
+
+jika begini 
+
+"data" : [
+     {
+  	"id": 2, 
+   	//dst
+       }
+     ]
+//itu format array, dan menampilkan lebih dari 1 data
+
+//ingat yang jadi pembeda adalah tanda kurung siku [] ->array
+dan tanda kurung karawal {} -> objek bukan array
+
+perintah di atas adalah menampilkan data secara keseluruhan,
+dan jika kita ingin menampilkan datanya sesuai dengan yang kita inginkan, maka kita harus memanggil nya melalui resource, 
+
+namun jika resource seperti ini atau mengikuti post yang pertama 
+
+return PostResource::collection($posts);
+
+maka itu akan menampilkan error, 
+
+jadi, penggunaan resource collection hanya bisa di gunakan untuk menampilkan data yang lebih dari satu atau array data
+
+nah, yang benar dalah perintah seperti ini
+
+return new PostResource($post)
+
+itu akan tampil datanya berdasarkan id, 
+namun tidak bisa menampilkan nama author nya, untuk menampilkan nama author nya, kita buat resource baru dengan perintah 
+
+php artisan make:resource PostDetailResource
+
+silahkan ganti di function resource ke resource yang sudah kita buat seperti ini
+
+return new PostDetailResource($post) //jangan lupa import filenya
+
+jangan lupa di file resource yang kita buat ubah menjadi seperti ini untuk menentukan data mana yang akan di tampilkan
+
+return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'news_content' => $this->news_content,
+            'created_at' => date('Y-m-d H:i:s a', strtotime($this->created_at)), //mengubah format date time yang akan di tampilkan
+            //atau bisa menggunakan cara ini : date_format($this->created_ad, "Y/m/d H:i:s")
+            'author' => $this->author
+        ]; //menampilkan data di frontend
+
+atribut author di atas hanya dapat menampilkan id authornya saja,
+
+jika ingin menampilkan namanya maka harus menggunakan relationship
+
+pada model post buat relasinya seperti ini
+
+public function user(): BelongsTo //jangan lupa import classnya
+    {
+        return $this->belongsTo(User::class, 'author', 'id');
+    }
+
+
+- selanjutnya pada post controller function nya ubah menjadi seperti ini
+
+public function show($id){
+        $post = Post::with('user')->findOrFail($id); //with digunakan untuk memanggil relasinya yang sudah kita tambahkan di model ->user harus di sesuaikan dengan nama functin relasinya di model
+        return new PostDetailResource($post);
+    }
+
+untuk menampilkan nama authornya pada PostDetailResource dalam array return tambahkan ini
+
+'user' => $this->user //digunakan untuk mengambil semua data user
+
+'user' => $this->user->username //digunakan untuk menampilkan value username di table user
+
+atau dengan cara lain
+
+di postResouce tetap seperti ini
+'user' => $this->user
+
+nah di controllernya pada postcontroller di function show ubah menjadi seperti ini
+
+$post = Post::with('user:id,username')->findOrFail($id); //with digunakan untuk memanggil relasinya yang sudah kita tambahkan di model ->user harus di sesuaikan dengan nama function relasinya di model
+        //user:id,username di gunakan untuk menentukan pada tabel user atribut mana yang akan di tampilkan pada frontend
+
+pada kasus dia atas di user:id,usernamae
+di tabel user primarykey harus di ikut sertakan
+
+menggunakan eiger loading untuk mengoptimalkan pengambilan data
+
+caranya 
+
+di postcontroller ubah dulu datanya menjadi seperti ini
+
+// $post = Post::findOrFail($id); //menggunakan eager loading
+
+kemudian di resource menjadi seperti ini
+
+// 'user' => $this->whenLoaded('user') //menggunakan eager loading
+
+
+
+
+
+
+

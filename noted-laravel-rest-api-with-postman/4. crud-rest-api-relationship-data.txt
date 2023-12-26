@@ -1,0 +1,209 @@
+
+
+//----- membuat route comments dan validanya 
+
+-- buat dulu comment controller
+
+-- kemudian buat routenya di dalam route group auth
+
+Route::post('/comment', [CommentsController::class, 'store']);
+
+-- buat function store di comment controller
+
+
+--- di postman pada collection laravel-api buat folder baru dengan nama comments 
+
+--- pada folder tsb add request dengan nama create comments dengan method post, jgn lupa tambahkan urlnya {{url}}/comment
+
+-- jangan lupa pada header nya tambahkan di atribut key tambahkan Accept dan valuenya application/json dan juga authorization pada key dan valuenya Bearer nametoken
+
+-- klik menu body di sebelah header, pilih raw pada radio button dan pilih JSON pada pilihan combobox
+
+-- isi body nya seperti ini 
+
+{
+    "post_id" : 2,
+    "comments_content" : "tes comments"
+}
+
+///---- membuat fitur menulis comments
+
+--- pada function store di comment controller isinya seperti ini
+
+ public function store(Request $request){
+        $validated = $request->validate([
+            'post_id' => 'required|exists:posts,id',
+            'comments_content' => 'required'
+        ]);
+
+        $request['user_id'] = auth()->user()->id;
+
+        $comment = Comment::create($request->all());
+
+        return response()->json($comment);
+    }
+
+-- klik send pada postman, jika status codenya 200 OK, berarti sudah berhasil, klik juga tabel comments pada database untuk konfirmasi lebih lanjut
+
+/////---- membuat resource comment
+
+-- buat resource baru dengan nama ResourceComment -> buat dengan artisan
+
+-- pada function toArray di commentsresource isi seperti ini
+
+// return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'comments_content' => $this->comments_content,
+            'post_id' => $this->post_id,
+            'user_id' => $this->user_id,
+            'created_at' => date('Y-m-d H:i:s a', strtotime($this->created_at)), //mengubah format date time yang akan di tampilkan
+            //atau bisa menggunakan cara ini : date_format($this->created_ad, "Y/m/d H:i:s")
+        ]; //menampilkan data di frontend
+
+
+---- kita relasikan table user dengan comment dengan cara tambahkan ini pada model comments
+
+public function comments(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    } //tulis nama function sesuai dengan yang kita inginkan, asalkan nanti nama function yang kita panggil di comments resorce dan controller harus dengan yang sudah kita buat
+
+
+--- pada comment controller kita replace return nya menjadi seperti ini
+
+return new CommentsResource($comment->loadMissing(['comments:id,username']));
+
+
+---- pada comment resource di function toArray kita tambahkan pada array return atribut ini 
+
+'comments' => $this->whenLoaded('comments') 
+
+//comments pada controller dan resource adalah nama function relasi yang kita buat di model comment
+
+
+/////----- membuat middleware comment
+
+-- buat middleware baru dengan artisan dengan nama PemilikComentar
+
+-- buka middleware yang sudah kita buat, dan di public fuction handle request isi seperti ini 
+
+	$user = auth()->user()->id;
+        $comment = Comment::findorFail($request->id);
+
+        if($comment->user_id != $user){
+            return response()->json(['message' => 'Data Not Found'], 404);
+        }
+
+        return $next($request);
+
+
+
+//// jangan lupa import class middleware yang sudah kita buat tadi di kernel pada protected $middlewareAliases
+
+'pemilik-comentar' => \App\Http\Middleware\PemilikComentar::class,
+
+--- buat route untuk update comments di route group auth dan tambahkan middleware nya
+
+Route::patch('/comment/{id}', [CommentsController::class, 'update'])->middleware('pemilik-comentar');
+
+--- buka postman pada folder comment add request dan ubah namanya menjadi update comment dg method patch dan urlnya seperti ini : {{url}}/comment/1
+
+--- jangan lupa di header tambahkan pada Key tambahkan Accept dan valuenya application/json, pada baris kedua Authorization dan valuenya Bearer nametoken
+
+-- buat function update di comment controller
+
+public function update(Request $request, $id){
+        $validated = $request->validate([
+            'comments_content' => 'required'
+        ]);
+
+        $comment = Comment::findorFail($id);
+        $comment->update($request->only('comments_content'));
+
+        return new CommentsResource($comment->loadMissing(['comments:id,username']));
+    }
+
+
+--- di postman pada file update comment di folder comment pergi ke menu body, pilih radio button raw dan combobox JSON dan isi body nya
+
+{
+    "comments_content" : "comment update cuy"
+}
+
+-- klik send request dan lihat hasilnya di database 
+
+
+////--- membuat fitur delete commentar
+
+-- buat route nya di dalam route group auth
+
+Route::delete('/comment/{id}', [CommentsController::class, 'destroy'])->middleware('pemilik-comentar');
+
+--- di postman pada folder comment add request dengan nama delete comment, methodnya delete dan urlya : {{url}}/comment/1 -> 1 id yang ingin kita delete commentnya 
+
+--- pada menu header jangan lupa tambahkan di atribut key Accept dan valuenya application/json, pada baris kedua ada Authorization dan valuenya Bearer nametoken
+
+--- buat function destroy di comment controller 
+
+public function destroy($id){
+        $comment = Comment::findOrFail($id);
+        $comment->delete();
+
+        return new CommentsResource($comment->loadMissing(['comments:id,username']));
+    }
+
+--- karena menggunakan softdeletes jangan lupa pada model Comment tambahkan use SoftDeletes -> import juga classnya
+
+--- send di postman dan lihat status nya di postman, jika 200 OK berarti sudah benar, untuk konfirmasi lebih lanjut cek juga databasenya
+
+
+///--- menampilkan komentar di artikel/postingan
+
+-- buka model post dan buat relasinya dulu seperti ini
+
+
+public function comments(): HasMany //jangan lupa import classnya
+    {
+        return $this->hasMany(Comment::class, 'post_id', 'id');
+    }
+
+
+
+//--  kita buka post resource dan replace 
+'author' => ... to ->   'author' => $this->whenLoaded('user')
+
+---  dan di bawahnya tambahkan ini lagi
+
+
+ 'comments' => $this->whenLoaded('comments', function(){
+                return collect($this->comments)->each(function($comment){
+                    $comment->coments; //comments yg disini sesuai dg function relasi yang di tuliskan sebelumnya di post model
+                    return $comment;
+
+
+'comment_total' => $this->whenLoaded('comments', function(){
+                return $this->comments->count(); //menghitung jumlah total yang coment di postingan
+            })
+
+
+------ yang di atas tambahkan juga di postDetailResource
+
+
+//-- buka postcontroller ke function index replace lagi return nya menjadi seperti ini 
+
+
+ return PostResource::collection($posts->loadMissing(['user:id,username', 'comments:id,post_id,user_id,comments_content']));
+
+
+--- pada function show juga replace menjadi seperti ini
+
+
+return new PostDetailResource($post->loadMissing(['user:id,username', 'comments:id,post_id,user_id,comments_content']));
+
+
+--- di postman pada get post list atau show klik send dan lihat hasilnya, jika 200 Ok berarti sudah benar
+
+
+
+

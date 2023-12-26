@@ -1,0 +1,163 @@
+//  merapikan route dan alur pembelajaran api
+ 
+- hapus middleware pada route post dan detail post
+
+- buat group route seperti ini
+
+//route auth group
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Authentication Route
+    Route::get('/logout', [AuthenticationController::class, 'logout']);
+    Route::get('/me', [AuthenticationController::class, 'me_activity']);
+});
+
+///create artike menggunakan api
+
+- buat route posts store di dalam auth sanctum
+- di postman dalam collection laravel-api di folder post add request dengan nama create post dan methodnya post, lalu masukkan url sesuai dengan route api post yang  barusan di buat
+- jangan lupa di bagian header nya tambahkan Accept pada key dan application/json pada valuenya
+- buat function store di post controller dg request
+
+public function store(Request $request){
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'news_content' => 'required'
+        ]);
+        // return response()->json('request access success');
+
+        $request['author'] = Auth::user()->id;
+        $post = Post::create($request->all());
+
+        return new PostDetailResource($post->loadMissing('user:id,username')); 
+    }
+
+//perbedaan pemakaian with dan load missing
+contoh with -> Post::with('user:id')
+contoh loadmissing -> 
+	$post = Post::all();
+	$post->loadMissing('user:id')
+
+- untuk contoh post nya kita buka lagi postman, ke reqest create yang sudah kita buat, lalu kita pilih bagian Body, pilih radio button raw dan JSON bagian combo boxnya dan isi body nya sepert ini
+
+
+{
+    "title" : "Belajar Rest API Laravel 10",
+    "news_content" : "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sequi commodi natus, quae inventore unde praesentium repellendus reiciendis et! Possimus similique veritatis tempore mollitia eveniet? Quo illum corrupti libero commodi accusantium maiores ducimus id quibusdam deleniti, omnis quos placeat asperiores ratione repudiandae architecto repellat nesciunt nihil deserunt numquam at magni tempore?"
+}
+
+klik send request jika muncul detail file yang kita tambahkan dan status 201 created, berarti data berhasil di tambahkan, silahkan cek database juga untuk konfirmasi apakah data baru berhasil di tambahkan;
+
+
+///memanggil nama author dari posts list
+
+-> tambahkan ini saja pasa postResource nya :
+
+'author' => $this->user->username //memanggil username
+
+///////create post dengan author yang berbeda
+- logout dulu
+- login lagi dengan akun yang berbeda
+- create post -> jangan lupa tokennya
+
+//////membuat route update data posts
+
+- di dalam route grup auth buat route nya
+
+Route::patch('/posts/{id}', [Postcontroller::class, 'update']);
+
+- buat function update di postcontroller -> lanjut di bawah setelah buat middleware baru
+
+- di postman add new request dengan nama update post dan method nya PATCH, urlnya samakan dengan route yang telah di buat -> url : {{url}}/posts/2
+
+- jangan lupa juga di header nya tambahkan Accept pada key dan valuenya application/json
+
+- tambahkan juga di bawah Accept Authorization dan valuenya Bearer, lalu jalankan send requestnya
+
+/////// buat middleware untuk menampilkan data post update sesuai dengan author yang login
+
+php artisan make:middleware PemilikPostingan
+
+- setelah selesai di buat, jangan lupa import class nya di kernel.php 
+
+protected $middlewareAliases = [
+     ....
+     'pemilik-postingan' => \App\Http\Middleware\PemilikPostingan::class,
+];
+
+- di middleware pad file PemilikPostingan -> middleaware yang baru kita buat, isinya seperti ini :
+
+--- pada public function handle isinya seperti ini
+
+$currentUser = Auth::user();
+        $post = Post::findOrFail($request->id);
+
+        if($post->author != $currentUser->id){
+            return response()->json(['message' => 'Data Not Found'], 404);
+        }
+        return $next($request);
+
+- untuk menggunakan middleare yang kita buat tulis ini di route update pada route group auth : Route::patch('/posts/{id}', [Postcontroller::class, 'update'])->middleware('pemilik-postingan')
+
+///update artikel menggunakan API
+
+- di postman pada request update post pada menu body yang sejajar dengan header
+
+- di body pilih radio button raw dan combobox JSON lalu isi contentnya seperti ini
+
+{
+    "title" : "Update Laravel API 10",
+    "news_content" : " isi sesuai dengan yang kita inginkan"
+}
+
+- di PostController pada function update isi menjadi seperti ini: 
+
+public function update(Request $request, $id){
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'news_content' => 'required'
+        ]);
+
+        $post = Post::findOrFail($id);
+        $post->update($request->all());
+
+        return new PostResource($post->loadMissing('user:id,username'));
+
+    }
+
+
+- lalu send request di postman dan lihat status codenya di postman apakah sudah sukses dan lihat juga di database pada tabel post apakah data posts yang kita ubah sudah berubah 
+
+
+---///deleter artikel menggunakan API
+
+
+-- buat route di api
+
+Route::delete('/posts/{id}', [Postcontroller::class, 'destroy'])->middleware('pemilik-postingan');
+
+-- buat function delete di post controller
+
+-- buat add request new pada folder post dan ubah namanya menjadi delete post, ubah methodnya menjadi delete dan urlnya seperti ini : {{url}}/posts/4 -> 4 sesuaikan dengan id yang ingin kita delete 
+
+-- jangan lupa pada header nya tambahkan Accept di key dan valuenya application/json, 
+
+-- jangn lupa juga authorization nya di bawah accept dan valuenya Bearer tokenkita 
+
+-- klik send request untuk mencobanya
+
+-- kita gunakan dulu softdeletes untuk deletenya, jadi pada model Post kita tambahkan ini : 
+   use SoftDeletes; //jangan lupa import classnya
+
+-- kita kembali ke function delete di postController, isi seperti ini 
+
+public function destroy($id){
+        $post = Post::findOrFail($id);
+        $post->delete();
+
+        return new PostResource($post->loadMissing('user:id,username'));
+    }
+
+--- klik send request di postman, dan lihat hasilnya database, lihat atribut deleted_at apakah sudah ada isinya, jika sudah ada isinya berarti sudah benar.
+
+
+

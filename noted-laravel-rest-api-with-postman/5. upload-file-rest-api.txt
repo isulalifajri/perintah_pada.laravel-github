@@ -1,0 +1,70 @@
+
+
+///--- menambahkan images di posts
+
+///--- pastikan bahwa sudah ada colom images di tabel posts pada database
+
+
+--- return data image di resource
+
+--- pada postResource dan PostDetailResource di function toArray di return nya tambahkan ini
+
+'images' => $this->images,
+
+
+///---- upload images menggunakan API
+
+--- di postman pada folder post klik create post, arahkan ke menu body, dan karena ingin upload image kali ini kita menggunakan form-data
+
+-- jadi pilih radio button form-data, pada key nya tulis aja file dan type nya dari text ubah ke file di combobox
+
+-- karena menggunakan form-data kali ini, jadi yang kita tambahkan kemarin2 di raw, sekarang tambahkan pada key form-data valuenya silahkan isi dengan sesuai content post yang ingin di upload ke database,
+
+contoh :
+key 			value
+
+file			
+title			tes
+news_content		tes content
+
+--- untuk upload filenya silahkan pilih select file pada value, dan klik button + new file from local, silahkan pilih gambar mana yang akan di upload
+
+
+--- pada postcontroller kita buat function baru di paling bawah untuk function rename file yang kita upload isinya seperti ini
+
+function generateRandomString($length = 30) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+
+-- kemudian pada function store di postcontroller tambahkan ini di bawah request validate
+
+
+if($request->file){
+            //for uploading file
+            $fileName = $this->generateRandomString(); // memanggil function yang kita buat untuk proses rename file
+            $extension = $request->file->extension(); // mendapatkan extension file yang di upload
+
+            Storage::putFileAs('images', $request->file, $fileName.'.'.$extension);
+            //images di atas adalah nama folder tempat menyimpan file
+            $request['images'] = $fileName.'.'.$extension;
+        }
+
+---- klik send pada postman dan lihat hasilnya, cek juga di database apakah image nya sudah terupload atau belum, jika di postman status 201 Created berarti sudah benar,
+jangan lupa cek juga image nya di folder storage laravel
+
+
+///--- update image
+
+-- di postman pada folder post pilih update post, kemudian pilih body dan pilih form-data, sesuaikan seterusnya seperti create post
+
+
+--- ternyata saat ini untuk update melalui form-data di postman tidak bisa, jadi kita skip aja dulu ini,,
+
+-- dan selesailah sekarang belajar Rest API dengan Laravel v10 dan Postman

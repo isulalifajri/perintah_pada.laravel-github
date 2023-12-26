@@ -1,0 +1,140 @@
+
+Laravel Rest API Sanctum Authentication & API Token (Login Logout API)
+
+- pertama ikuti documentasi berikut ini
+
+	https://laravel.com/docs/10.x/sanctum
+
+ oh iyya, jika kita mengintall laravel versi terbaru dari versi 9 ke atas
+ maka sudah ada sanctum ya, karena sudah di install otomatis saat membuat projectnya
+ jadi tidak perlu lagi install paket manager nya melalui composer
+
+ cara cek nya apakah benar sudah terinstall sanctum di laravel, buka file composer.json 
+-> cari key require, dan jika ada sanctum nya berarti sudah terinstall
+
+- lanjut untuk authentication sanctum
+
+pada route api yang kita buat tambahkan middleware yang kita buat seperti ini
+
+Route::get('/posts', [Postcontroller::class, 'index'])->middleware(['auth:sanctum']);
+
+coba cek di postman, send request pada route yang kita buat
+
+{
+    "message": "Unauthenticated."
+}
+
+jika tampilannya seperti di atas berarti sudah benar
+jika belum coba cek model user apakah sudah menggunakan user api token seperti ini : use HasApiTokens
+
+- selanjutnya kita membuat token untuk user login -> jadi user sudah login bisa mengakses routenya 
+
+buat controller baru dengan nama -> AuthenticationController
+
+buat route baru di api seperti ini 
+
+// Authentication Route
+Route::post('/login',[AuthenticationController::class, 'login']);
+
+selanjutnya pada folder collection yang sudah kita buat dengan nama laravel-api, buat folder di dalamnya dengan nama -> Authentication
+- lalu add request di folder auth yang sudah di buat, add request dengan nama file login dan methodnya post
+- jangan lupa di bagian header pada key tambahkan accept dan valuenya application/json
+
+pada controler auth yang sudah kita buat, buat function baru seperti ini
+
+public function login(Request $request){
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+	$user = User::where('email', $request->email)->first();
+    }
+
+lalu send di postman
+
+jika muncul email dan password harus di isi, berarti validasinya sudah jalan
+
+- untuk mengujinya atau post email di postman untuk cek auth nya, pilih body pada landing page sebelah kanan header
+pada pilihan radio button pilih raw atau form data.
+
+jika menggunakan form data klik aja di bagian key nya sesuai dengan name atribut kita database dan valuenya\
+
+contoh key : email , value : admin@gmail.com
+       key : password , value : 12345
+
+lalu klik send untuk melihat hasilnya
+
+
+jika menggunakan raw -> jika nanti muncul combo box di sebelah kanan pilih JSON
+
+klik ini di bagian body nya
+
+{
+    "email" : "admin@gmail.com",
+    "password" : "12345"
+}
+
+dan lihat hasilnya
+
+untuk validasi email dan password yang di inputkan oleh tambahkan pada function login di bawah variabel $user menjadi seperti ini
+
+if (! $user || ! Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+        // dd($user);
+
+return $user->createToken($request->device_name)->plainTextToken; // untuk nama create token kita bisa ubah namanya sesuai dengan yang kita inginkan seperti contoh di bawah createToken('user login') -> di ubah ke string
+
+//      menggunakan token untuk mengakses API
+
+createToken di atas -> kita di buatkan token login kita untuk bisa mengakses route yang di auth
+cara membawa token tersebut supaya bisa mengakses api, berikut adalah caranya di postman
+
+copy token yang sudah di berikan
+
+kemudian ke header di bawah accept buat lagi key namanya Authorization dan 
+pada valuenya ketik Bearer spasi dan paste token yang copy -> lalu sendrequest untuk menampilkan hasilnya
+
+berikut ini contoh isi valuenya : Bearer 5|ijoNkXj8cQv1VsLV3YMQqZpTWvQEz5qTzUpqAMNIe3d2414d
+
+revoke(menarik kembali) token ketika logout
+
+- buat routenya di api : Route::get('/logout', [AuthenticationController::class, 'logout'])->middleware(['auth:sanctum']);
+- buat controllernya di auth controller : 
+
+public function logout(Request $request){
+        // Revoke the token that was used to authenticate the current request...
+        // Cabut/Tarik kembali token yang digunakan untuk mengautentikasi permintaan saat ini...
+        $request->user()->currentAccessToken()->delete();
+
+        // Revoke all tokens...
+        //$request->user()->tokens()->delete(); //menarik kembali semua token dengan id yang sama
+
+        return 'berhasil logout';
+    }
+
+
+kemudian buka postman, add request ->name filenya logout method get, jangan lupa masukkan urlnya -> {{url}}/me
+header key seperti biasa, ketik accept dan value application/json
+di bawah accept tambahkan juga Authorization dan value nya :::: Bearer 5|ijoNkXj8cQv1VsLV3YMQqZpTWvQEz5qTzUpqAMNIe3d2414d
+
+
+////cara token mengenali siapa yang lagi login
+
+buat route api nya : Route::get('/me', [AuthenticationController::class, 'me_activity'])->middleware(['auth:sanctum']);
+
+buka postman, add request pada folder auth rename filenya menjadi me denga method get -> jangan lupa key dan valuenya di isi di header ->accept and application/json
+tambahkan juga Authorization dan valuenya -> Bearer name_token
+
+di auth controller jangan lupa buat functionya 
+
+public function me_activity(Request $request){
+        return response()->json(Auth::user());
+    } 
+
+silahkan send request di postman untuk melihat hasilnya
+
+
+
