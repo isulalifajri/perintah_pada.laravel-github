@@ -1,0 +1,294 @@
+
+
+
+///--- laravel livewire
+
+- laravel v10
+- xampp v3.3.0
+- php v8.2.12
+- livewire v3.x
+
+- Docs : https://livewire.laravel.com/docs
+
+--- buat project laravel
+
+- composer create-project laravel/laravel study-laravel-livewire
+
+--- install livewire di dalam folder projek yang sudah kita buat
+
+- composer require livewire/livewire
+
+-- install component livewire
+
+- php artisan make:livewire counter //counter bisa kita ubah namanya sesuai dengan yang kita inginkan
+
+//yang di buat di atas kita sebut saja istilah nya seperti controller dalam laravel yang mana nanti di gunakan untuk menyimpan data-data projek kita di livewire ini
+
+nanti hasilnya akan membuat 2 file dalam folder yang berbeda seperti ini 
+
+CLASS: app/Livewire//counter.php
+VIEW:  D:\LARAVEL\LARAVEL-10\study-laravel-v10-livewire\resources\views/livewire/counter
+
+dalam livewire view tidak boleh ada 2 div yang sama, tapi kalau div dalam div itu boleh
+
+
+-- buat file home di dalam view dan arahkan route defaultnya ke file itu
+
+-- dalam tag body pada file home isikan seperti ini
+
+<body>
+    @livewire('namecomponent') // namecomponent yang di sebutkan itu mengarah ke class namecomponent di dalam folder livewire di bawah http
+</body>
+
+
+/// contoh penggunaan livewire ->input data ke dalam field tanpa menyimpan ke database
+
+-- buat varibel dengan tipe public di Employe livewire :
+
+ public $nama;
+
+-- pada view blade livewire
+
+
+ <input type="text" class="form-control" value="{{ $nama }}"> //menampilkan nilai value
+
+//---jika menggunakan livewire hapus value nya dan replace seperti di bawah ini 
+
+<input type="text" class="form-control" wire:model="nama"
+
+
+//proses kirim data
+<button type="button" name="submit" wire:click="store()">Save</button> //wire:click="store()" function untuk proses penampilan value
+
+-- buat function store di livewire class
+
+    public function store(){
+        $this->nama = 'Langit';
+    }
+
+-- klik button save makan nanti akan menampilkan nama langit, sesuai dengan yang kita isi di function store
+
+-- kita juga bisa menampilkan nama yang di inputkan dan menampilkannya kembali dengan cara seperti ini :
+
+ public function store(){
+        $this->nama = 'Nama Kamu' . $this->nama;
+    }
+
+//nanti hasilnya akan seperti ini
+
+ Nama Kamu nama yang di inputkan
+
+
+
+
+
+///--- sekarang cara menambahkan data ke database dengan livewire
+
+-- buat database, dan tuliskan nama databasenya di .env laravel
+
+-- buat model baru dengan migration nya melalui artisan
+
+-- di migration buat name atributnya dan migrate untuk import ke database
+
+--- isi modelnya seperti saat crud biasa
+
+-- di function store buat validasinya untuk input data
+
+
+///-- menampilkan data dari database
+
+pada function render di class livewire tambahkan ini
+
+$data = ModelsEmployee::orderByDesc('created_at')->paginate(5);
+        return view('livewire.employee', [
+            'dataEmployees' => $data
+        ]);
+
+
+--- untuk menggunakan pagination di dalam classnya tambahkan ini : use WithPagination;
+
+--- lalu di bagian bawah tabel pada livewire blade tambahkan ini : {{ $dataEmployees->links() }}
+
+-- kemudian yang biasanya {{ $loop->iteration }} replace dengan ini : {{ $dataforeach->firstItem() + $key }} 
+
+
+
+///-- update data
+
+-- di blade livewire pada tambahkan ini pada button edit
+
+<a wire:click="edit({{ $item->id }})">Edit</a>
+
+
+-- di class livewire buat function edit
+
+public function edit($id){
+        $data = ModelsEmployee::find($id);
+        $this->name = $data->name;
+        $this->email = $data->email;
+        $this->address = $data->address;
+
+        $this->updateData = true;
+
+	$this->employee_id = $id;
+    }
+
+//di dalam class livewire ini tambahkan ini : 
+
+public $updateData = false;
+public $employee_id;
+
+
+//kemudian di blade livewire buat kondisi seperti ini
+
+ @if ($updateData == false)
+    <button type="button" name="submit"
+    wire:click="store()">Save</button>
+ @else
+    <button type="button" name="submit"
+    wire:click="update()">Update</button>
+  @endif
+
+///--- kembali ke class livewire, dan buat function update dengan isinya seperti ini
+
+
+public function update(){
+        $rules = [
+            'name' => 'required',
+            'email' => 'required|email',
+            'address' => 'required',
+        ];
+
+        $validated = $this->validate($rules);
+
+        $data = ModelsEmployee::find($this->employee_id);
+
+        $data->update($validated);
+
+        session()->flash('success', 'Data Updated Successfully');
+    }
+
+
+///--- livewire delete data
+
+-- pada button delete tambahkan function ini
+
+wire:click="delete({{$item->id}})"
+
+-- buat function di class livewire
+
+
+public function delete($id){
+        ModelsEmployee::find($id)->delete();
+
+        session()->flash('success-danger', 'Data Deleted Successfully');
+
+        $this->clear();
+    }
+
+///--- searching data
+
+-- buat form input search dan tambahkn dalam input fild nya wire:model.live="katakunci"
+
+-- buat properti di class livewire seperti ini : public $katakunci;
+
+
+-- di dalam function render di class livewire replace varible $data menjadi seperti ini :
+
+if($this->katakunci != null){
+            $data = ModelsEmployee::where('name', 'like', '%' . $this->katakunci . '%')
+            ->orWhere('email', 'like', '%' . $this->katakunci . '%')
+            ->orWhere('address', 'like', '%' . $this->katakunci . '%')
+            ->orderByDesc('created_at')->paginate(5);
+        }else{
+            $data = ModelsEmployee::orderByDesc('created_at')->paginate(5);
+        }
+
+///--- bulk delete (delete data secara massal di livewire)
+
+-- tambahkan ini pada table view blade
+
+ <th></th>
+
+ <td><input type="checkbox" wayer:key="{{ $item->id }}" value="{{$item->id}}" wire:model.live="employee_selected_id"></td>
+
+
+-- tambahkan component ini di class livewire
+
+public $employee_selected_id = []; //array
+
+
+-- pada bagian view blade livewire di bawah title data table tambahkan ini :
+
+ @if ($employee_selected_id)
+            {{-- @php
+                print_r($employee_selected_id);
+            @endphp --}}
+
+            <a wire:click="delete_confirmation('')" class="btn btn-danger btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#exampleModal">Del {{ count($employee_selected_id) }}</a>
+        @endif
+
+
+--- kemudian di class livewire pada function delete_confirmation() replace isinya menjadi seperti ini :
+
+if($id != ''){
+            $this->employee_id = $id;
+        }
+
+
+-- pada function delete replace datanya menjadi seperti ini
+
+if($this->employee_id != ''){
+            $id = $this->employee_id;
+            ModelsEmployee::find($id)->delete();
+        }
+        
+        if(count($this->employee_selected_id)){
+            for($i = 0; $i < count($this->employee_selected_id);$i++){
+                ModelsEmployee::find($this->employee_selected_id[$i])->delete();
+            }
+        }
+
+
+--- lalu tambahkan ini pada function clear di class livewire
+
+$this->employee_selected_id = [];
+
+
+
+////---- sortable livewire
+
+-- buat icon sort di masing-masing atribut dengan css
+
+--- tambahkan ini ti masing-masing atributnya 
+
+wire:click="sort('name')"
+
+--- pada class livewire tambahkan properti ini
+
+public $sortColumn;
+
+--- lalu buat function sort dan isinya seperti ini
+
+public function sort($columnName){
+        $this->sortColumn = $columnName;
+        $this->sortDirection = $this->sortDirection == 'asc' ? 'desc' : 'asc';
+
+    }
+
+--- kemudian di function render kita replace di bagian orderby nya menjadi seperti ini
+
+
+->orderBy($this->sortColumn, $this->sortDirection)->paginate(5);
+
+
+--- dan pada blade livewire ini tambahkan ini pada masing-masing class atribut th nya 
+
+@if($sortColumn=='name') {{ $sortDirection }} @endif
+
+
+
+
+--- selesai ---
+
+
