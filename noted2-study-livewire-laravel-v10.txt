@@ -1,0 +1,257 @@
+
+
+
+///--- laravel livewire
+
+- laravel v10
+- xampp v3.3.0
+- php v8.2.12
+- livewire v3.x
+
+- Docs : https://livewire.laravel.com/docs
+
+--- buat project laravel
+
+composer create-project laravel/laravel study2-laravel-livewire3
+
+
+-- buat database di phpmyadmin dengan nama -> study2_laravel_liveware3
+
+-- tambahkan ke .env laravel database yg telah di buat
+
+-- membuat tabel baru di laravel dengan cara migration
+
+   php artisan make:model Post -m
+
+
+-- buka migration table yang sudah di buat dan isi function up nya seperti di bawah ini 
+
+ 	$table->id();
+        $table->string('image');
+        $table->string('title');
+        $table->text('content');
+        $table->timestamps();
+        $table->softDeletes();
+
+
+-- buka model post dan tambahkan ini 
+
+	protected $guarded = ['id'];
+
+
+-- jalankan migration table dengan perintah artisan migrate agar tabel yang kita buat di tambahkan ke database
+
+
+--- install livewire versi 3 di dalam folder projek yang sudah kita buat
+
+- composer require livewire/livewire
+
+-- kemudian jalankan juga perintah ini
+
+- php artisan livewire:publish --config
+
+-- install component livewire
+
+-- membuat induk view template dengan livewire
+
+	php artisan livewire:layout
+
+-- perintah di atas akan membuat folder dan file baru di dalam view
+
+-- struktur foldernya seperti ini :
+
+- view/components/layouts -> app.blade.php
+
+- pada file app.blade.php tambahkan ini pada tag head dan body :
+
+
+	<html>
+	<head>
+    		...
+    		@livewireStyles
+	</head>
+	<body>
+    		...
+    		@livewireScripts
+	</body>
+	</html>
+
+
+--- tambahkan {{ $slot }} di atas @livewireScripts pada tag body untuk merender view yang menggunakan file ini sebaga induk atau lebih singkatnya  ... di atas di replace ke yang di bawah ini
+
+{{ $slot }}
+
+-- buat component lagi untuk menampilkan data post dengan perintah berikut ini
+
+
+  php artisan make:livewire SomeComponent --inline //hanya membuat livewire di bawah Http tidak di resource
+
+  php artisan make:livewire posts.index // membuat livewire di bawah http dan resource
+
+ 
+-- perintah di atas akan membuat folder livewire tepat di bawah Http dan membuat livewire di dalam resources view, berikut ini adalah struktur folder dan filenya
+
+- di bawah Http : livewire/posts -> index.blade.php 
+
+- di resource: view/livewire/posts -> index.blade.php
+
+-- pada file index di dalam folder livewire di bawah Http tambahkan beberapa code berikut ini :
+
+
+use App\Models\Post; -> import class model
+use Livewire\Component; -> import class component
+use Livewire\WithPagination; import class pagination
+
+-- selanjutnya di dalam class index tambahka ini
+
+	use WithPagination;
+
+-- lalu di dalam function render replace codenya menjadi seperti ini 
+
+	 return view('livewire.posts.index', [
+            'posts' => Post::latest()->paginate(5)
+        ]);
+
+
+-- pada file index.blade.php di resources tambahkan code di bawah ini untuk membuat pagination pada post yang nanti akan di tampilkan dari database
+
+{{ $posts->links('vendor.pagination.bootstrap-5') }} //menggunakan pagination boostrap 5
+
+
+-- setelah itu jalankan perintah di bawah ini untuk publish viewnya 
+
+	php artisan vendor:publish --tag=laravel-pagination
+
+-- selanjutnya kita buat route untuk menampilkan post nya sepert di bawah ini 
+
+
+	Route::get('/', App\Livewire\Posts\Index::class)->name('posts.index');
+
+	atau seperti ini 
+
+	Route::get('/', Index::class, 'index'); //import classnya juga
+
+
+
+-- buat class dan view post create livewire dengan perintah berikut ini 
+
+	php artisan make:livewire posts.create
+
+-- kemudian buka file class post create yang sudah kita buat dan tambahkan ini dalam classnya
+
+
+use App\Models\Post;
+use Livewire\Component;
+use Livewire\WithFileUploads; -> untuk upload image
+use Livewire\Attributes\Rule; -> untuk validasi insert
+
+
+-- di dalam class create tambahkan ini
+
+use WithFileUploads;
+
+    //image
+    #[Rule('required', message: 'Masukkan Gambar Post')]
+    #[Rule('image', message: 'File Harus Gambar')]
+    #[Rule('max:1024', message: 'Ukuran File Maksimal 1MB')]
+    public $image;
+
+    //title
+    #[Rule('required', message: 'Masukkan Judul Post')]
+    public $title;
+
+dst..
+
+
+-- buat function store pada class create nya dan isi seperti ini 
+
+-- pada function render di class create arahkan return nya pada form input 
+
+-- buka view post create dan pada tag form tambahkan kode berikut ini
+
+<form wire:submit="store" enctype="multipart/form-data">
+
+
+-- dan fild input nya seperti ini
+
+<div class="form-group mb-4">
+     <label class="fw-bold">JUDUL</label>
+     <input type="text" class="form-control @error('title') is-invalid @enderror" wire:model="title" placeholder="Masukkan Judul Post">
+      <!-- error message untuk title -->
+      @error('title')
+         <div class="alert alert-danger mt-2">
+              {{ $message }}
+         </div>
+      @enderror
+</div>
+
+dst..
+
+-- kemudian tambahkan route create sepert ini
+
+//posts create
+Route::get('/create', App\Livewire\Posts\Create::class)->name('posts.create');
+
+// or
+// Route::get('/create', Create::class, 'create')->name('posts.create'); //import classnya
+
+
+-- jika insert gambar ke storage dan ingin menampilkan gambar di index, tambahkan perintah ini 
+
+	php artisan storage:link
+
+-- selanjutnya kita buat livewire untuk edit data
+
+-- ketikkan perintah ini di project yg sudah kita buat
+
+	php artisan make:livewire posts.edit
+
+-- perintah di atas membuat class dan view edit
+
+-- di view edit pada form tambahkan ini
+
+<form wire:submit="update" enctype="multipart/form-data">
+
+-- kemudian tambahkan ini pada input field
+
+wire:model="title"
+
+
+-- di class edit samakan di class create, hanya memang ada beberapa yang perlu di tambahkan, seperti function mount
+
+-- untuk route nya seperti ini
+
+Route::get('/edit/{id}', Edit::class, 'edit')->name('posts.edit');
+
+
+-- selanjutnya untuk delete data menggunakan livewire
+
+-- buat function destroy di class index dan isinya seperti ini
+
+ public function destroy($id)
+    {
+        //destroy
+        Post::destroy($id);
+
+        //flash message
+        session()->flash('message', 'Data Berhasil Dihapus.');
+
+        //redirect
+        return redirect('/');
+    }
+
+-- di view index pada button delete tambahkan ini
+
+wire:click="destroy({{ $post->id }})"  wire:confirm="Are you sure you want to delete this post?"
+
+
+
+
+
+
+
+
+
+--- selesai ---
+
+
