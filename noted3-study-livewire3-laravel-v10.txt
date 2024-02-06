@@ -1,0 +1,1286 @@
+
+
+
+///--- laravel livewire
+
+- laravel v10
+- xampp v3.3.0
+- php v8.2.12
+- livewire v3.x
+
+- Docs : https://livewire.laravel.com/docs
+
+--- buat project laravel
+
+composer create-project laravel/laravel study3-laravel10-livewire3
+
+-- jalankan laravel
+
+-- install livewire
+
+	composer require livewire/livewire
+
+-- gunakan framemowrk css adminlte (bootstrap 4)
+
+-- buat partial dan layoutnya
+
+-- buat controller admin dashboard dan routenya
+
+-- buat provider baru dengan perintah ini
+
+	php artisan make:provider BladeComponenServiceProvider
+
+-- buka file provider yang sudah di buat, dan pada function register isi seperti ini :
+
+Blade::component('components.layouts.app', 'admin-layout');
+
+
+-- buka file app pada folder config dan tambahkan provider yang sudah kita buat pada atribut provider
+
+ App\Providers\BladeComponenServiceProvider::class,
+
+-- kemudian jalankan ini lagi
+
+	php artisan config:cache
+
+
+-- buka view dashboard dan tambakan ini
+
+	<x-admin-layout>
+	    // isi content
+	</x-admin-layout>
+
+-- buka view app dan replace yield('content') dengan di bawah ini
+
+	{{ $slot }}
+
+-- di terminal vscode jalankan lagi perintah ini 
+
+	php artisan make:livewire admin/users/list-users
+
+// perintah diatas di gunakan untuk membuat class dan view livewire di laravel
+
+
+-- buka route web dan tambahkan ini
+
+	Route::get('admin/users', ListUsers::class)->name('admin.users');
+
+-- jika menggunakan livewire v3 jalankan perintah ini 
+
+  php artisan livewire:layout
+
+-- tambahkan ini juga pada view app
+
+@livewireStyles
+@livewireScripts
+
+-- pada partials sidebar tambahkan ini, agar menu aktif sesuai dengan request page nya
+
+href="{{ route('admin.users') }}" class="nav-link {{ request()->is('admin/users') ? 'active' : '' }}"
+
+
+-- kemudian pada view list-user tambahkan button add user dan modal
+
+-- pada button add user isilah seperti ini
+
+<button wire:click.prevent="addNew">ADD</button>
+
+-- buat function addnew di class listuser dan isi seperti ini
+
+ $this->dispatch('show-form');
+
+-- kemudian pada viw app tambahkan ini dalam scripts
+
+  window.addEventListener('show-form', event => {
+    $('#exampleModal').modal('show');
+  })
+
+-- di tag div awal modal tambahkan code ini
+ 
+	wire:ignore.self
+
+
+-- pada view list-user type button save nya ubah ke submit
+
+-- kemudian pada form create nya tambahkan ini
+
+	wire:submit.prevent="createUser"
+
+-- pada masing-masing field nya tambahkan ini sesuai dengan nama masing-masing field
+
+	wire:model.defer="state.name"
+
+-- di dalam class ListUser tambahkan ini
+
+	//public $name;
+	public $state = [];
+	//dst...
+
+-- buat database dan tambahkan nama databasenya di .env laravel
+	
+-- jalankan lagi ini -> php artisan config:cache dan lakukan migration pada laravel
+
+-- pada function createUser di class Listuser tambahkan ini
+
+$validatedData = Validator::make($this->state, [
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|confirmed',
+        ])->validate();
+
+        $validatedData['password'] = bcrypt($validatedData['password']);
+
+        User::create($validatedData);
+ 	
+	session()->flash('message', 'User added succesfully!!');
+
+        $this->dispatch('hide-form');
+
+        return redirect()->back();
+
+
+-- pada file app.blade di layout tambahkan lagi script ini
+
+ window.addEventListener('hide-form', event => {
+    $('#exampleModal').modal('hide');
+  })
+
+-- pada class listuser di function replace isinya menjadi seperti ini
+
+ $users = User::latest()->paginate();
+        return view('livewire.admin.users.list-users', [
+            'users' => $users
+        ]);
+
+-- pada view listuser tambahkan notifikasi alert ini
+
+@if (session()->has('message'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <strong><i class="fas fa-check-circle mr-1"></i>Success!</strong> {{ Session::get('message') }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      @endif
+
+-- atau bisa menggunakan toastr dari link berikut ini :
+
+https://codeseven.github.io/toastr/
+
+-- kembali view list user dan pada button edit tambahkan ini :
+
+	wire:click.prevent="edit({{ $user }})
+
+-- di dalam class listuser tambahkan ini
+
+	public $user;
+
+    	public $showEditModal = false;
+
+-- pada function addnew tambahkan ini juga
+
+	$this->showEditModal = false; 
+	$this->state = [];
+
+-- buat function edit dan function updateuser seperti di bawah ini :
+
+public function edit(User $user){
+        $this->showEditModal = true;
+        $this->user = $user;
+        $this->state = $user->toArray();
+        $this->dispatch('show-form');
+    }
+
+    public function updateUser(){
+
+        $validatedData = Validator::make($this->state, [
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,'.$this->user->id,
+            'password' => 'sometimes|confirmed',
+        ])->validate();
+
+        if (!empty($validatedData['password'])) {
+            $validatedData['password'] = bcrypt($validatedData['password']);
+        }
+
+
+        $this->user->update($validatedData);
+
+        $this->dispatch('hide-form', message: 'User updated successfully!');
+
+    }
+
+-- kemudian kembali ke view list user dan pada modal form replace wire:submit menjadi seperti ini :
+
+	wire:submit.prevent="{{ $showEditModal ? 'updateUser' : 'createUser' }}
+
+-- pada modal title replace menjadi seperti ini juga
+
+	@if ($showEditModal)
+           <span>Edit User</span>
+        @else
+           <span>Add New User</span>
+        @endif
+
+-- dan pada button submit replace juga menjadi seperti ini
+
+	@if ($showEditModal)
+           <span>Save Changes</span>
+        @else
+           <span>Save</span>
+        @endif
+
+-- kemudian pada view listuser di button delete tambahkan ini
+
+wire:click.prevent="confirmUserRemoval({{ $user->id }})" 
+wire:confirm="Are you sure you want to delete this user?"
+
+-- di class listuser buat buat function seperti di bawah ini
+
+public function confirmUserRemoval($userId){
+        // User::find($userId)->delete();
+        $user = User::findOrFail($userId);
+        $user->delete();
+        $this->dispatch('alert-delete', message: 'User deleted successfully!');
+    }
+
+-- dan pada app view tambahkan ini
+
+window.addEventListener('alert-delete', event => {     
+      toastr.error(event.detail.message, 'Success!');
+    }) 
+
+
+--- selanjutnya membuat pagination
+
+-- pada view list user tambahkan ini
+
+	{{ $users->links() }}
+
+-- pada class listuser tambahkan ini juga
+
+ 	use WithPagination;
+
+    	protected $paginationTheme = 'bootstrap';
+
+-- pada function rendernya nilai paginate nya di isi, contoh : ..paginate(5);
+
+
+-- selanjutnya jalankan perintah ini
+
+	php artisan make:livewire admin/appoinments/list-appoinments
+
+-- pada class listappoinments isikan ini extends nya di ubah ke -> AdminComponent
+
+-- kemudian jalankan perintah ini lagi
+
+  php artisan make:livewire admin/AdminComponent --inline
+
+-- kemudian tambahkan lagi seperti code seperti ini
+
+	use WithPagination;
+
+    	protected $paginationTheme = 'bootstrap';
+
+-- pada class listuser delete/coment kode seperti di atas tersebut, dan extends nya di ubah ke ->  AdminComponent
+
+
+-- buat model baru dengan perintah ini
+
+	php artisan make:model Client -m
+
+	php artisan make:model Appoinment -m
+
+-- isi migration nya dan lakukan migrate
+
+-- bukan model client dan appoinment dan isi code berikut ini
+
+	protected $guarded = ['id];
+
+-- buat class dan view baru dengan perintah berikut ini
+
+php artisan livewire:make admin/appoinments/create-appoinment-form
+
+-- buat routenya juga seperti ini
+
+Route::get('create', CreateAppoinmentForm::class)->name('create');
+
+-- isi content card pada viewnya
+
+-- jalankan perintah ini di terminal untuk membuat data client secara otomatis
+
+	php artisan make:factory ClientFactory
+
+-- buka file clientfactory, cari function definition dan pada return nya tambahkan ini
+
+	'name' => $this->faker->name,
+
+-- di terminal jalankan perintah ini
+
+	php artisan tinker
+
+-- kemudian perintah ini
+
+	App\Models\Client::factory()->create();
+
+--- buka class livewire createappoinment dan pada function render paste code berikut ini
+
+$clients = Client::all();
+return view('livewire.admin.appoinments.create-appoinment-form', [
+            'clients' => $clients,
+        ]);
+
+-- kode di atas di gunakan untuk menampilkan data client di form select pada view create appoinment dengan code di bawah ini
+
+ @foreach ($clients as $client)
+ <option value="{{ $client->id }}">{{ $client->name }}</option>
+  @endforeach
+
+
+--- pada form select nya tambahkan kode ini
+
+	wire:model.defer="state.client_id"
+
+-- pada form yang lain juga tambahkan sesuai dengan namanya
+
+
+-- pada form action tambahkan ini -> wire:submit.prevent="CreateAppoinment" autocomplete="off"
+
+
+-- dan pada class create appoinment tambahkan ini -> public $state = [];
+
+-- masih di class createappointment buat function createAppoinment dan isi seperti ini
+
+Validator::make($this->state, [
+            'client_id' => 'required',
+            'status' => 'required|in:SCHEDULED,CLOSED'
+        ], ['client_id.required' => 'The client field is required'])->validate();
+        Appoinment::create($this->state);
+
+        $this->dispatch('alert', message: 'Appoinment updated successfully!');
+
+
+// menggunakan ckdeditor cdn
+
+-- install ini di script app utama view
+
+
+
+-- lihat documentasinya di sini
+
+	https://cdn.ckeditor.com/
+
+
+-- mengelola datetime dengan laravel carbon
+
+-- pada view
+
+	<td>{{ $app->date->toFormattedDate() }}</td>
+
+-- pada function boot di appserviceprovider
+
+
+       Carbon::macro('toFormattedDate', function() {
+            return $this->format('d/m/Y');
+        });
+
+// set Class status with function
+
+-- in view
+
+<td>
+   <span class="badge badge-{{ $app->status_badge }}">
+        {{ $app->status }}
+   </span>
+</td>
+
+
+-- in model
+
+public function getStatusBadgeAttribute(){
+        $badges = [
+            'SCHEDULED' => 'primary',
+            'CLOSED' => 'success'
+        ];
+        return $badges[$this->status];
+    }
+
+
+
+//Edit Apppointment
+
+-- jalankan perintah ini
+
+php artisan make:livewire admin/appoinments/update-appoinment-form
+
+-- buat route web nya
+
+
+-- tambahkan ini di class updateappoint yang sudah di buat
+
+	public $state = [];
+	public $appointment;
+
+-- buat function seperti di bawah ini
+
+public function mount(Appoinment $appoint){
+        $this->state = $appoint->toArray();
+	$this->appointment = $appoint;
+    }
+
+
+-- buka model Appoinment dan tambahkan function ini
+
+
+ public function getDateAttribute($value){
+
+        return date('d/m/Y', strtotime($value));
+        // return Carbon::parse($value)->toFormattedDate(); // if use Format datetime Carbon 
+    }
+    
+    public function getTimeAttribute($value){
+        // return Carbon::parse($value)->toFormattedDate(); // if use Format datetime Carbon 
+        return date('h:m A', strtotime($value));
+    }
+
+
+-- pada tag form tambahkan ini di view updateappoinment
+
+ wire:submit.prevent="UpdateAppoinment"
+
+
+
+-- buat function nya di class updateappoinment seperti ini
+
+
+public function UpdateAppoinment(){
+        Validator::make($this->state, [
+            'client_id' => 'required',
+            'note' => 'nullable',
+            'status' => 'required|in:SCHEDULED,CLOSED'
+        ], ['client_id.required' => 'The client field is required'])->validate();
+        // dd($this->state);
+        $this->appointment->update($this->state);
+
+        $this->dispatch('alert', message: 'Appoinment updated successfully!');
+    }
+
+//delete appoinment
+
+-- pada view list appoinment di button delete tambahkan ini
+
+wire:click.prevent="confirmAppoinmentRemoval({{ $appoint->id }})"
+wire:confirm="Are you sure want to delete this appoinment?"
+
+-- pada class listAppoinment tambahkan function ini
+
+ public function confirmAppoinmentRemoval($appointID){
+
+  $appoinment = Appoinment::findOrFail($appointID);
+
+  $appoinment->delete();
+
+  $this->dispatch('alert-delete', message: 'Appoinment deleted successfully!');
+    }
+
+//search form
+
+-- pada view tambahkan ini
+
+ <input wire:model.live="searchForm" type="text" class="form-control" placeholder="Search">
+
+-- pada class livewire tambahkan ini
+
+public $searchForm = null;
+
+-- kemudian di function rendernya seprti ini
+
+$users = User::
+        where('name', 'like', '%'.$this->searchForm.'%')
+        ->latest()->paginate(5);
+
+
+
+-- filtering in appoinment
+
+-- buka view nya dan tambahkan ini
+
+
+<div class="btn-group">
+   <button wire:click="filterAppoinmentByStatus" type="button" class="btn {{ is_null($status) ? 'btn-secondary' : 'btn-default' }}">
+   <span class="mr-1">All</span>
+   <span class="badge badge-pill badge-info">{{ $allApoinmentCount }}</span>
+   </button>
+
+   <button wire:click="filterAppoinmentByStatus('scheduled')" type="button" class="btn {{ ($status == 'scheduled') ? 'btn-secondary' : 'btn-default' }}">
+   <span class="mr-1">Scheduled</span>
+   <span class="badge badge-pill badge-primary">{{ $scheduledAppCount }}</span>
+   </button>
+
+   <button wire:click="filterAppoinmentByStatus('closed')" type="button" class="btn {{ ($status == 'closed') ? 'btn-secondary' : 'btn-default' }}">
+   <span class="mr-1">Closed</span>
+   <span class="badge badge-pill badge-success">{{ $closedAppCount }}</span>
+   </button>
+</div>
+
+
+-- buka class livewirenya dan tambahkan ini 
+
+	public $status = null;
+
+
+-- buat function nya
+
+public function filterAppoinmentByStatus($status = null){
+	$this->resetPage(); //if use pagination
+        $this->status = $status;
+    }
+
+-- tambahkan ini juga di rendernya
+
+
+$appoints = Appoinment::orderBy('id', 'desc')->with('client')
+        ->when($this->status, function($query, $status) {
+            return $query->where('status', $status);
+        })
+        ->paginate(5);
+
+        $appoinmentsCount = Appoinment::count();
+        $scheduledAppoinmentsCount = Appoinment::where('status', 'scheduled')->count();
+        $closedAppoinmentsCount =  Appoinment::where('status', 'closed')->count();
+
+
+//upload gambar
+
+-- buat form nya di view
+
+<input wire:model="photo" type="file" id="customFile">
+   <label class="custom-file-label" for="customFile">
+       @if ($photo)
+         {{ $photo->getClientOriginalName() }}
+       @else
+         Choose Image
+       @endif
+
+-- di class livewire tambahkan ini
+
+	 public $photo;
+
+-- di function createuser tambahkan ini
+
+ if($this->photo){
+            $validatedData['avatar'] = $this->photo->store('/', 'avatars');
+        }
+
+-- kemudian buka folder config->fileystems dan tambahkan ini pada array disk dan links
+
+'avatars' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/avatars'),
+            'url' => env('APP_URL').'/storage/avatars',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
+-- di links
+
+public_path('storage/avatars') => storage_path('app/public/avatars'),
+
+-- jalankan ini 2 perintah ini
+
+	php artisan storage:link
+	php artisan config:cache
+
+-- manggilnya di view seperti ini
+
+<img src="{{ Storage::disk('avatars')->url($user->avatar) }}" alt="">
+
+-- jika gambarnya tidak muncul mengikuti gambar di atas, buka file .env dan ubah APP_URL nya sesuai dengan yang di tampilkan di php artisan serve, seperti contoh berikut ini :
+	APP_URL=http://127.0.0.1:8000
+
+-- catatan lain -> jika ada error code yang di tulis pada model sedangkan codenya jalan, nonaktifkan pengaturan undefined method php intelephensi..
+
+caranya : klik icon pengaturan di vscode, pilih setting, ketik intelephense dan scrool dan hilangkan centang pada undefined method
+
+//view image in edit form
+
+-- pada view tambahkan ini
+
+<img src="{{ $state['avatar_url'] ?? '' }}">
+
+
+-- pada function edit tambahkan ini
+
+	 $this->reset();
+
+-- pada model nya tambahkan ini
+
+	protected $appends = [
+        'avatar_url',
+    	];
+
+
+-- pada function update tambahkan ini
+
+if($this->photo){
+     if ($this->user->avatar) {
+        Storage::disk('avatars')->delete($this->user->avatar);
+            }
+      $validatedData['avatar'] = $this->photo->store('/', 'avatars');
+        }
+
+
+-- dan pada function delete tambahkan ini juga untuk menghapus image
+
+$user = User::findOrFail($userId);
+        if ($user->avatar) {
+            Storage::disk('avatars')->delete($user->avatar);
+        }
+
+//menggunakan alpinejs untuk progressbar image upload
+
+-- install cdn alpinejs, kunjungi link di bawah ini untuk caranya
+
+//link di bawah ini tidak perlu karena jika menggunakan livewire versi 3 ternyata sudah terinstall otomatis alpine nya
+https://alpinejs.dev/essentials/installation
+
+-- kemudian viewnya seperti ini progress bar nya
+
+<div x-data="{ isUploading: false, progress: 0 }"
+                    x-on:livewire-upload-start="isUploading = true"
+                    x-on:livewire-upload-finish="isUploading = false"
+                    x-on:livewire-upload-error="isUploading = false"
+                    x-on:livewire-upload-progress="progress = $event.detail.progress">
+
+                    <input wire:model="photo" type="file" id="customFile" accept="image/png, image/gif, image/jpeg, image/jpg, image/webp">
+
+                    <div x-show="isUploading" class="progress progress-sm mt-3 rounded">
+                        <div class="progress-bar bg-primary progress-bar-striped"
+                            role="progressbar"
+                            :aria-valuenow="progress"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            :style="'width:' + progress + '%'">
+                             <span x-text="progress + ' Complete (success)'" class="sr-only"></span>
+                        </div>
+                    </div>
+                </div>
+
+
+/// menggunakan bulk delete di livewire 3
+
+@dump($selectRows) -> menampilkan hasil yang di klik di view
+
+-- di view blade nya tambahkan ini
+
+@if (count($selectRows) != 0)
+    <div class="btn-group mx-2">
+       <button type="button" class="btn btn-default">Bulk Action</button>
+       <button type="button" class="btn btn-default dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+       <span class="sr-only">Toggle Dropdown</span>
+       </button>
+     <div class="dropdown-menu" role="menu" style="">
+       <a wire:click.prevent="deleteSelectedRows" wire:confirm.prompt="Are you sure you want to delete this items?\n\nType DELETE to confirm|DELETE" class="dropdown-item" href="#">Deleted Selected</a>
+       <a wire:click.prevent="markAllAsScheduled" class="dropdown-item" href="#">Mark as Scheduled</a>
+       <a wire:click.prevent="markAllAsClosed" class="dropdown-item" href="#">Mark as Closed</a>
+       </div>
+     </div>
+   <span>Selected {{ count($selectRows) }} {{ Str::plural('appoinment', count($selectRows))}}</span>
+@endif
+
+
+
+-- untuk membuat tombol cheklist nya pada table sepert ini
+
+/// chekclist all rows
+
+<th>
+   <div class="icheck-primary d-inline ml-2">
+     <input wire:model.live="selectPageRows" type="checkbox" value="" name="todo2" id="todoCheck2">
+         <label for="todoCheck2"></label>
+   </div>
+</th>
+
+
+/// checklist per baris
+
+<th>
+  <div class="icheck-primary d-inline ml-2">
+     <input wire:model.live="selectRows" type="checkbox" value="{{ $appoint->id }}" name="todo2" id="{{ $appoint->id }}">
+     <label for="{{ $appoint->id }}"></label>
+  </div>
+</th>
+
+
+
+--- dan pada class livewire nya di tambahkan ini
+
+    public $selectRows = [];
+    public $selectPageRows = false;
+
+
+public function updatedSelectPageRows($value){
+        if($value){
+            $this->selectRows = $this->appoinments->pluck('id')->map(function ($id){
+                return (string) $id;
+            });
+        }else{
+            $this->reset(['selectRows', 'selectPageRows']);
+        }
+    }
+    
+    public function updatedSelectRows()
+    {
+        // Jika tidak ada baris yang dichecklist, set tombol "Select All" menjadi false
+        if ($this->selectPageRows == true) {
+            $this->selectPageRows = false;
+        }
+    }
+
+    public function getAppoinmentsProperty(){
+        return Appoinment::orderBy('id', 'desc')->with('client')
+        ->when($this->status, function($query, $status) {
+            return $query->where('status', $status);
+        })
+        ->paginate(5);
+    }
+
+
+    public function markAllAsScheduled(){
+        Appoinment::whereIn('id', $this->selectRows)->update(['status' => 'SCHEDULED']);
+
+        $this->dispatch('alert', message: 'Appoinment marked as Scheduled!');
+        $this->reset(['selectRows', 'selectPageRows']);
+    }
+
+    public function markAllAsClosed(){
+        Appoinment::whereIn('id', $this->selectRows)->update(['status' => 'CLOSED']);  
+        $this->dispatch('alert', message: 'Appoinment marked as Closed!');
+        $this->reset(['selectRows', 'selectPageRows']);  
+    }
+
+
+    public function deleteSelectedRows(){
+        Appoinment::whereIn('id', $this->selectRows)->delete();
+
+        $this->dispatch('deleted', message: 'All Selected Appointment deleted Succesfully!');
+
+        $this->reset(['selectRows', 'selectPageRows']);
+    }
+
+
+
+// Adding login Functionality using Laravel Fortify Package
+
+https://laravel.com/docs/10.x/fortify#main-content
+
+-- jalankan perintah ini secara berurutan dari atas
+
+   composer require laravel/fortify
+
+   php artisan vendor:publish --provider="Laravel\Fortify\FortifyServiceProvider"
+
+   php artisan migrate
+
+
+-- kemudian pada atribut providers di config/app.php tambahkan ini
+
+App\Providers\FortifyServiceProvider::class,
+
+
+-- setelah itu arahkan cursor pada code di atas, klik ctrl pada keyword dan tekan klik pada mouse agar di arahkan ke sumber filenya
+
+
+-- setelah berada di filenya tambahkan ini pada public function boot
+
+Fortify::loginView(function(){
+     return view('auth.login');
+   });
+
+
+-- kemudian buat folder auth pada resources view dan di dalam folder auth nya buat file login.blade.php
+
+
+-- tambahkan ini pada tag form
+
+<form action="{{ route('login') }}" method="POST">
+        @csrf
+
+
+-- kemudian buka RouteServiceProvider pada folder app/providers
+
+-- dan pada code ini sesuaikan dengan halaman yang akan kita tuju setelah berhasil login
+
+
+public const HOME = '/admin/dashboard';
+
+
+-- kemudian pada file fortify.php di config, pada attribute home replace menjadi seperti ini
+
+'home' => RouteServiceProvider::HOME,
+
+
+-- kemudian pada route web.php buat route group dan taruh daftar route yang hanya bisa di akses saat login saja, seperti ini :
+
+Route::group(['middleware' =>  'auth'], function() {
+   //daftar route nya disini
+   route::get(/dashbord).dst
+});
+
+
+{{ auth()->user()->name }} -> menampilkan nama sesuai dengan yang login
+
+{{ auth()->user()->avatar_url }} -> menampilkan gambar sesuai dengan yang login
+
+-- logout tombol
+
+<li class="nav-item">
+            <form method="POST" action="{{ route('logout') }}">
+              @csrf
+              <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="nav-link">
+                <i class="nav-icon fas fa-sign-out-alt"></i>
+                <p>
+                  Logout
+                </p>
+              </a>
+            </form>
+          </li>
+
+
+
+-- buat middleware baru dengan perintah berikut ini
+
+php artisan make:middleware Administrator
+
+
+-- buka file administrator pada Http folder middleware dan pada function handle replace codenya menjadi seperti ini
+
+if(auth()->check() && auth()->user()->isAdmin()){
+            return $next($request);
+        }
+        abort(401);
+
+
+-- kemudian pada file kernel.php di protected $middlewareAliases tambahkan class administrator seperti di bawah ini
+
+'admin' => \App\Http\Middleware\Administrator::class,
+
+-- pada route group nya tambahkan authentifikasi sepert ini
+
+
+Route::group(['middleware' => ['auth', 'admin']], function () {
+  ////disini taruh route yang hanya bisa di akses oleh admin
+});  
+
+
+
+-- pada Model User tambahkan function ini
+
+public function isAdmin(){
+        if($this->role != 'admin'){
+            return false;
+        }
+        return true;
+    }
+
+
+//atau bisa menggunakan ini
+
+-- dalam class Model User tambahkan ini
+
+    const ROLE_ADMIN = 'admin';
+    const ROLE_USER = 'user';
+
+-- kemudian pada function isAdmin ubah isinya menjadi menjadi seperti ini
+
+
+	if($this->role != self::ROLE_ADMIN){
+            return false;
+        }
+        return true;
+
+//// buat route sendiri untuk admin
+
+
+-- buat file admin.php di dalam folder routes
+
+-- kemudian pindah semua route yang ada di dalam group auth admin ke dalam file admin.php, jangan lupa class importnya juga di ambil, untuk route group nya hapus aja
+
+
+-- pada route get nya misal seperti ini 
+
+Route::get('admin/dashboard', DashboardController::class)->name('admin.dashboard');
+    
+    Route::get('admin/users', ListUsers::class)->name('admin.users');
+
+dst.. yang pentin ada admin nya di depannya
+
+// hapus nama admin baik yg di dalam get maupun di name nya seperti ini
+
+Route::get('dashboard', DashboardController::class)->name('dashboard');
+    
+Route::get('users', ListUsers::class)->name('users');
+
+
+-- nanti nama admin nya di taruh di dalam file RouteServiceProvider Seperti di bawah ini -> di prefix dan as
+
+-- buka RouteServiceProvider pada folder provider dan buat route seperti di bawah ini :
+
+
+ Route::middleware(['web', 'auth', 'admin'])
+     ->prefix('admin')
+     ->as('admin.')
+     ->group(base_path('routes/admin.php')); 
+
+//yg as ada titiknya di belakanya
+
+-- kode di atas taruh di bawah Route yang sudah ada sebelumnya
+
+
+//Table Inline Editing Livewire
+
+-- tambahkan Role pada th table di view, dan tambahkan code ini pada td table nya
+
+
+ <td>
+    <select class="form-control"  wire:change="changeRole({{ $user }}, $event.target.value)">
+       <option value="admin" {{ ($user->role == 'admin') ? 'selected' : ''}}>ADMIN</option>
+       <option value="user" {{ ($user->role == 'user') ? 'selected' : ''}}>USER</option>
+      </select>
+ </td>
+
+
+-- kemudian pada class nya buat function seperti ini
+//jgn lupa import class yg di butuhkan
+
+public function changeRole(User $user, $role){
+        Validator::make(['role' => $role], [
+            'role' => [
+                'required',
+                Rule::in(User::ROLE_ADMIN, User::ROLE_USER),
+            ],
+            'role' => 'required|in:admin,user'
+        ])->validate();
+        $user->update(['role' => $role]);
+        $this->dispatch('hide-form', message: "Role changed to {$role} successfully!");
+    }
+
+// Dashboard tampil jumlah data berdasarkan selectbox
+
+-- jalankan perintah ini 
+
+php artisan make:livewire admin/appointments/appointments-count
+
+-- buka view blade nya dan tambahkan kode ini
+
+
+<div class="d-flex justify-content-between align-items-center">
+    <h3>{{ $appoinmentsCount }}</h3>
+    <select wire:change="getAppoinmentsCount($event.target.value)" style="height: 2rem; outline:2px solid transparent;" class="px-1 rounded border-0">
+       <option value="">All</option>
+       <option value="scheduled">Scheduled</option>
+       <option value="closed">Closed</option>
+    </select>
+ </div>
+
+
+-- buka class livewirnya dan tambahkan code ini
+
+    public $appoinmentsCount;
+
+    public function mount(){
+        $this->getAppoinmentsCount();
+    }
+
+    public function getAppoinmentsCount($status = null){
+        $this->appoinmentsCount = Appoinment::query()
+        ->when($status, function($query, $status){
+            return $query->where('status', $status);
+        })
+        ->count();
+    }
+
+
+
+/// update profile dengan livewire alpinejs
+
+-- jalankan perintah ini untuk membuat class dan viewnya
+
+php artisan make:livewire admin/profile/update-profile
+
+
+-- pada sidebar tampilan profile pada tag img yang menampilkan profile tambahkan id seperti ini pada tag img nya -> id="profileImage"
+
+-- dan pada view update-profile tambahkan ini
+
+
+ <div class="text-center" x-data="{imagePreview: '{{ auth()->user()->avatar_url }}'}">
+                    <input wire:model="image" class="d-none" type="file" x-ref="image"
+                        x-on:change="
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                imagePreview = event.target.result;
+                                document.getElementById('profileImage').src = `${imagePreview}`;
+                            };
+                            reader.readAsDataURL($refs.image.files[0]);
+                        "
+                    >
+                    <img x-on:click="$refs.image.click()" class="profile-user-img img-fluid img-circle" style="height: 80px; width:80px"
+                         x-bind:src="imagePreview ? imagePreview : '{{ auth()->user()->avatar_url }}'"
+                         alt="User profile picture">
+                  </div>
+
+
+-- kemudian pada class livewire nya tambahkan ini
+
+    
+    use WithFileUploads;
+    public $image;
+    public function updatedImage(){
+
+        $previousPath = auth()->user()->avatar; // mengambil image yg sudah ada sebelumnya
+        $path = $this->image->store('/', 'avatars');
+
+        auth()->user()->update(['avatar' => $path]);
+
+        Storage::disk('avatars')->delete($previousPath); //menghapus image yang sudah ada sebelumnya
+
+        $this->dispatch('alert', message: 'Profile Image changed successfully!');
+    } 
+
+
+-- jika ingin menghapus file image di storage livewire-tmp maka tambahkan function berikut ini di class nya
+
+public function cleanupOldUploads(){
+        $storage = Storage::disk('local');
+
+        foreach ($storage->allFiles('livewire-tmp') as $filePathname){
+            $yesterdaysStamp = now()->subSeconds(4)->timestamp;
+            if($yesterdaysStamp > $storage->lastModified($filePathname)){
+                $storage->delete($filePathname);
+            }
+        }
+    }
+
+
+//export to excel with livewire 3
+
+Dokumentasi : https://docs.laravel-excel.com/3.1/getting-started/
+
+https://github.com/roromix/SpreadsheetBundle
+
+-- jika menggunakan xampp pada module Apache klik config (action sebelumnya sudah di start), setelah klik config, pilih php.ini, klik itu dan cari extension ini :
+
+- extension=gd -> hapus titik koma -> ; di depannya
+- extension=zip -> hapus titik koma -> ; didepannya
+
+-- instal package ini
+
+    composer require roromix/spreadsheetbundle
+
+-- kemudian pada config/app.php tambahkan ini
+
+'providers' => [
+    // ...
+    Roromix\Spreadsheet\SpreadsheetServiceProvider::class,
+],
+
+
+'aliases' => [
+    // ...
+    'Spreadsheet' => Roromix\Spreadsheet\Facades\Spreadsheet::class,
+],
+
+
+-- buka view livewire dan tambahkan code ini
+
+ <a wire:click.prevent="export" class="dropdown-item" href="#">Export to Excel</a>
+
+-- install package ini
+
+   composer require maatwebsite/excel
+
+-- kemudian pada config app.php tambahkan ini (jika di perlukan, jika tidak bisa di skip)
+
+
+  di provider :
+
+ Maatwebsite\Excel\ExcelServiceProvider::class, //export excel
+
+di aliases :
+
+'Excel' => Maatwebsite\Excel\Facades\Excel::class, //export to excel
+
+-- kemudian jalankan ini
+
+php artisan vendor:publish --provider="Maatwebsite\Excel\ExcelServiceProvider" --tag=config
+
+-- perintah di atas akan membuat file excel.php di folder config
+
+-- jalankan ini lagi
+
+php artisan make:export AppoinmentsExport
+atau bisa di tambahkan ini di akhirnya --model=Siswa -> jika ingin langsung menghubungkannya dg model
+
+
+-- perintah di atas akan membuat file AppoinmentsExport di folder app Exports
+
+-- jika perintah di atas tidak tambahkan --model=Namamodel di belakangnya, buka file yang sudah kita buat tadi, dan tambahkan ini di function collection nya
+
+return Appoinment::all(); // bisa di ubah sesuai dengan nama model yang ingin di export ke excel
+
+-- kemudian pada class livewire buat function dan tambahkan ini di dalam function nya
+
+public function export(){
+        return Excel::download(new AppoinmentsExport, 'appoinments.xlsx');
+    }
+
+-- dan beberapa petunjuk di atas sudah bisa mengexport data ke dalam excel, namun jika ingin meng export data berdasarkan data yang di pilih, berikut adalah beberapa perintahnya :
+
+-- pada file AppoinmentsExport tambahkan function ini 
+
+    use Exportable;
+    protected $selectedRows;
+
+public function __construct($selectRows)
+    {
+        $this->selectedRows = $selectRows;
+        //dd($this->selectedRows);
+    }
+
+    public function query(){
+        return Appoinment::whereIn('id', $this->selectedRows);
+    }
+
+-- hapus function collection nya, dan nama class ubah menjadi seperti ini :
+
+from this -> implements FromCollection -> to this -> implements FromQuery
+
+-- pada class liveire ubah isi function export menjadi seperti ini :
+
+return (new AppoinmentsExport($this->selectRows))->download('appoinments.xlsx');
+
+-- kembali ke file AppoinmenstExport di dalam folder Exports, jika ingin menentukan atribut mana saja yang ingin di export dan menambahkan heading pada excelnya saat di export, tambahkan function ini :
+
+public function map($appoinment): array
+    {
+        return[
+            $appoinment->id,
+            $appoinment->client->name, //untuk tabel berelasi
+            $appoinment->date,
+            $appoinment->time,
+            $appoinment->status,
+        ];
+    }
+
+    public function headings(): array
+    {
+        return[
+            '#ID',
+            'Client Name',
+            'Date',
+            'Time',
+            'Status',
+        ];
+    }
+
+-- kemudian replace function query nya menjadi seperti ini :
+
+return Appoinment::with('client:id,name')->whereIn('id', $this->selectedRows);
+
+-- kemudian pada nama class nya ubah atau tambahkan menjadi seperti ini, sekaligus jangan lupa import classnya
+
+class AppoinmentsExport implements FromQuery, WithMapping, WithHeadings 
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
