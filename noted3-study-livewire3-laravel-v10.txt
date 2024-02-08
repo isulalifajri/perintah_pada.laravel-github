@@ -493,11 +493,21 @@ wire:confirm="Are you sure want to delete this appoinment?"
 
 public $searchForm = null;
 
--- kemudian di function rendernya seprti ini
+-- kemudian di function rendernya seperti ini
 
 $users = User::
         where('name', 'like', '%'.$this->searchForm.'%')
         ->latest()->paginate(5);
+
+//jika ada pagination tambahkan ini
+
+protected $queryString = ['searchForm' => ['except' => '']];
+
+
+
+public function updatedSearchForm(){
+        $this->resetPage();
+    }
 
 
 
@@ -1192,6 +1202,148 @@ return Appoinment::with('client:id,name')->whereIn('id', $this->selectedRows);
 
 class AppoinmentsExport implements FromQuery, WithMapping, WithHeadings 
 
+
+// update profile with fortify
+
+-- pada viewnya di form input tambahkan ini
+
+wire:model.defer="state.name"
+
+-- kemudian di formnya tambahkan ini 
+
+wire:submit.prevent="updateProfile"
+
+-- buka class livewire nya dan tambahkan ini
+
+//function ini taruh paling di atas urutan function di class ini
+ public function mount(){
+        $this->state = auth()->user()->only(['name', 'email']); //toArray() -> menampilkan semuanya
+    }
+
+
+//
+
+//
+public function updateProfile(UpdatesUserProfileInformation $updater){
+        $updater->update(auth()->user(), [
+            'name' => $this->state['name'],
+            'email' => $this->state['email'],
+        ]);
+
+        $this->dispatch('alert', message: 'Profile updated successfully!');
+    }
+
+
+UpdatesUserProfileInformation -> ini ngambil di folder Action\Fortify pada file -> UpdateUserProfileInformation yang terletak di sebelah implements class function, seperti di bawah ini :
+
+class UpdateUserProfileInformation implements UpdatesUserProfileInformation
+
+-- pada function updateProfile tambahkan ini
+
+$this->dispatch('nameChanged', auth()->user()->name); //jika livewire 2 biasanya menggunakan $this->emit
+
+- pada navbar dan sidebar replace auth username seperti ini
+
+<span class="ml-1"  x-data x-ref="username">{{ auth()->user()->name }}</span>
+
+-- kemudian pada view profile tambahkan ini di paling bawah
+
+@push('js')
+<script>
+    $(document).ready(function () {
+        Livewire.on('nameChanged', (changedName) => {
+            $('[x-ref="username"]').text(changedName);
+        })
+    });
+</script>
+@endpush
+
+
+
+
+//----- update password dengan fortify
+
+-- pada form view tambahkan ini
+
+form wire:submit="changePassword"
+
+-- pada class livewirenya tambahkan function ini
+
+public function changePassword(UpdatesUserPasswords $updater) //ngambil dari FortifyServiceProvider
+    {
+        $updater->update(auth()->user(), [
+            'current_password' => $this->state['current_password'] ?? '',
+            'password' => $this->state['password'] ?? '',
+            'password_confirmation' => $this->state['password_confirmation'] ?? '',
+        ]);
+
+        $this->state['current_password'] = '';
+        $this->state['password'] = '';
+        $this->state['password_confirmation'] = '';
+
+        // $updater->update( //cara yang lebih singkat
+        //     auth()->user(),
+        //     $attributes = Arr::only($this->state, ['current_password', 'password', 'password_confirmation'])
+        // );
+
+        // collect($attributes)->map(fn ($value, $key) => $this->state[$key] = '');
+
+        $this->dispatch('alert', message: 'Password changed successfully!');
+    }
+
+
+//--- Drag and drop table denga livewire 3
+
+https://github.com/livewire/sortable -> Documentation
+
+-- tambahkan ini pada layouts app di bawah di bawah @livewireScripts seperti di bawah ini
+
+@livewireScripts
+
+<script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
+
+
+-- pada tbody di view tambahkan seperti di bawah ini
+
+<tbody wire:sortable="updateAppoinmentOrder">
+
+-- pada tr table di view tambahkan ini
+
+<tr wire:sortable.item="{{ $appoint->id }}" wire:key="appoint-{{ $appoint->id }}" wire:sortable.handle>
+
+
+ <td wire:sortable.handle style="width: 10px; cursor: move;vertical-align: bottom;"><i class="fa fa-arrows-alt text-muted"></i></td>
+
+-- buat colom baru di tabel dengan contoh berikut ini
+
+php artisan make:migration add_order_position_to_appoinments_table
+
+
+-- buka migration nya dan pada function up tambahkan ini
+
+$table->integer('order_position')->default(null);
+
+-- pada function down tambahkan ini
+
+$table->dropColumn('order_position');
+
+
+-- lalukan jalankan perintah migrate untuk menyimpan colomnya ke dalam database
+
+-- kemudian pada class livewire nya tambahkan function ini
+
+public function updateAppoinmentOrder($items)
+    {
+        foreach ($items as $item) {
+            Appoinment::find($item['value'])->update(['order_position' => $item['order']]);
+        }
+
+        $this->dispatch('alert', message: 'Appointments sorted successfully.');
+    }
+
+-- tampilkan di render sesuai dengan urutan order_position seperti ini
+
+return Appoinment::orderBy('order_position', 'asc')..dst.
 
 
 
