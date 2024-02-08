@@ -276,13 +276,50 @@ window.addEventListener('alert-delete', event => {
 
   php artisan make:livewire admin/AdminComponent --inline
 
--- kemudian tambahkan lagi seperti code seperti ini
+-- kemudian tambahkan lagi code seperti ini di class Admin Component
 
 	use WithPagination;
 
     	protected $paginationTheme = 'bootstrap';
 
 -- pada class listuser delete/coment kode seperti di atas tersebut, dan extends nya di ubah ke ->  AdminComponent
+
+-- pada view nya jika menggunakan livewire ini yang biasanya menggunakan {{ $loop->iteration }} untuk pengurutan angkanya itu di ubah, jika menggunakan pagination, dan ini adalah caranya :
+
+- pada foreach di view isi seperti ini
+
+@forelse ($users as $index => $user)
+
+
+- kemudian di loop->iteration replace menjadi seperti ini
+
+{{ $users->firstItem() + $index }}
+
+-- jika ingin menampilkan tulisan ini -> Showing 1 to 5 of 23 results di sebelah pagination nya
+
+-- jalankan perintah ini
+
+php artisan livewire:publish --pagination
+
+-- perintah di atas akan menampilkan folder vendor\livewire di dalam folder view
+
+-- di dalam folder vendor\livewire tsb ada beberapa file, buka file tailwind.blade, copy kode yg di butuhkan, kemudian buka file boostrap.blade, arahkan tag nav
+
+-- pada tag nav ini tambahkan class d-flex align-items-center, kemudian di bawah nya paste code yg di copy tadi, seperti ini :
+
+ <div>
+                <p class="">
+                    <span>{!! __('Showing') !!}</span>
+                    <span class="">{{ $paginator->firstItem() }}</span>
+                    <span>{!! __('to') !!}</span>
+                    <span class="">{{ $paginator->lastItem() }}</span>
+                    <span>{!! __('of') !!}</span>
+                    <span class="">{{ $paginator->total() }}</span>
+                    <span>{!! __('results') !!}</span>
+                </p>
+            </div>
+
+//selesai utk pagination
 
 
 -- buat model baru dengan perintah ini
