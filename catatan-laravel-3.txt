@@ -72,3 +72,12 @@ https://www.mynotescode.com/nomor-urut-datatables/
 
 //catatan jika menggunakan laragon dan terjadi masalah di php curl
 https://www.kreaweb.be/laragon-update-apache/ -> intinya update apache yang di gunakan
+
+
+//menjalankan ngrok dengan laragon
+
+-- buka terminal laragon dan ketikkan perintah berikut ini :
+php -S localhost:7000 -t nameproject/public
+
+-- buka terminal baru di laragon dan ketikkan lagi perintah ini :
+ngrok http localhost:7000 -> sesuaikan port dengan yg kita buat sebelumnya
