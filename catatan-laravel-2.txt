@@ -73,6 +73,9 @@ Category::create([
 //noted
 - php artisan route:list
 
+//send notifikasi email dan database di laravel
+https://wahyuivan.medium.com/membuat-notifikasi-ke-email-dan-halaman-website-mu-dengan-laravel-notifications-laravel-queues-852a2c823d0c
+
 //send email laravel 10
 https://laravel-school.com/posts/how-to-send-email-in-laravel-10/
 https://www.itsolutionstuff.com/post/laravel-10-mail-laravel-10-send-mail-tutorialexample.html
