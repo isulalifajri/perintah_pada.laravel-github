@@ -82,6 +82,9 @@ php -S localhost:7000 -t nameproject/public
 -- buka terminal baru di laragon dan ketikkan lagi perintah ini :
 ngrok http localhost:7000 -> sesuaikan port dengan yg kita buat sebelumnya
 
+-- di xampp menggunakan ngrok
+ketikan perintah : ngrok http 8000 -> 8000 sesaikan dengan nama port nya
+
 
 //issue datables yajra server side
 https://github.com/yajra/laravel-datatables/issues/139
