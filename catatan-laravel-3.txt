@@ -88,3 +88,7 @@ ketikan perintah : ngrok http 8000 -> 8000 sesaikan dengan nama port nya
 
 //issue datables yajra server side
 https://github.com/yajra/laravel-datatables/issues/139
+
+//optimalisasi pemanggilan query laravel
+https://github.com/itsgoingd/clockwork -> composer require itsgoingd/clockwork
+extension: clockwork 
