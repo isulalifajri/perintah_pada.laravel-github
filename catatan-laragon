@@ -16,3 +16,5 @@ C:/laragon/etc/apache2/fcgid.conf:
 Wrapper
 C:/laragon/bin/php-src-php-7.4.33/php-cgi.exe
 cannot be accessed:(720002) The system cannot find the file specified
+
+solusinya berarti versi php yang di install harus benar-benar sesuai
