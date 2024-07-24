@@ -6,3 +6,13 @@ https://www.kreaweb.be/laragon-update-apache/ -> intinya update apache yang di g
 
 -- buka terminal laragon dan ketikkan perintah berikut ini :
 php -S localhost:7000 -t nameproject/public
+
+jika terjadi error di laragon seperti ini :
+//
+service apache can not start reason:
+
+AH00526: syntax error on line 24 of
+C:/laragon/etc/apache2/fcgid.conf:
+Wrapper
+C:/laragon/bin/php-src-php-7.4.33/php-cgi.exe
+cannot be accessed:(720002) The system cannot find the file specified
