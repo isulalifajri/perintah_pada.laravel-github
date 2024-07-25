@@ -1,2 +1,37 @@
 //send notifikasi email dan database di laravel
 https://wahyuivan.medium.com/membuat-notifikasi-ke-email-dan-halaman-website-mu-dengan-laravel-notifications-laravel-queues-852a2c823d0c
+
+-selanjutnya buat middleware -> agar nanti notifikasinya bisa di akses di semua halaman
+
+perintahnya : php artisan make:middleware Notifications
+isi filenya seperti ini :
+// $user = Auth::user();
+
+        // if ($user) {
+        //     $notifications = $user->notifications;
+        //     $unreadCount = $user->unreadNotifications->count();
+        // } else {
+        //     $notifications = [];
+        //     $unreadCount = 0;
+        // }
+
+        // view()->share('notifications', $notifications);
+        // view()->share('unreadCount', $unreadCount);
+
+        // Mendapatkan semua notifikasi
+        // $notifications = DatabaseNotification::all();
+        $notifications = DatabaseNotification::latest()->take(5)->get();
+
+        // Menghitung jumlah notifikasi yang belum dibaca
+        $unreadCount = DatabaseNotification::whereNull('read_at')->count();
+
+        view()->share('notifications', $notifications);
+        view()->share('unreadCount', $unreadCount);
+        
+        return $next($request);
+
+
+tambahkan juga pada kernel seperti ini :
+'notification' => \App\Http\Middleware\Notifications::class,
+
+selanjutnya notificationya bisa di taruh dalam middleware group route
