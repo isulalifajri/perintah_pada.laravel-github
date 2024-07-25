@@ -1,5 +1,10 @@
 //send notifikasi email dan database di laravel
 https://wahyuivan.medium.com/membuat-notifikasi-ke-email-dan-halaman-website-mu-dengan-laravel-notifications-laravel-queues-852a2c823d0c
+- php artisan queue:table
+- php artisan notification:table
+- php artisan migrate
+- php artisan make:notification ExampleNotification
+
 
 -selanjutnya buat middleware -> agar nanti notifikasinya bisa di akses di semua halaman
 
