@@ -1,5 +1,8 @@
 //spatie laravel login
 https://stackoverflow.com/questions/66954243/how-to-add-spatie-role-condition-in-login-using-laravel
 
-//install package spatie
+//install package spatie untuk login
 https://spatie.be/docs/laravel-permission/v5/installation-laravel
+
+// install spatie media libraray laravel untuk upload image
+https://spatie.be/docs/laravel-medialibrary/v11/installation-setup
