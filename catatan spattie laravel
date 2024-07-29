@@ -6,3 +6,7 @@ https://spatie.be/docs/laravel-permission/v5/installation-laravel
 
 // install spatie media libraray laravel untuk upload image
 https://spatie.be/docs/laravel-medialibrary/v11/installation-setup
+
+//catatan upload multiple image
+https://github.com/spatie/laravel-medialibrary/issues/1117
+https://stackoverflow.com/questions/57794682/laravel-spatie-medialibrary-upload-multiple-images-through-rest-api
