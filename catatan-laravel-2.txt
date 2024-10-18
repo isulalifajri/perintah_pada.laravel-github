@@ -142,6 +142,8 @@ seterusnya ikuti perintah/cara-cara yang ada link di atas
 'aliases' => [
 	....
 	'PDF' => Barryvdh\DomPDF\Facade::class,
+         jika di atas tidak bisa, coba ini
+	'PDF' => Barryvdh\DomPDF\Facade\Pdf::class,
 ]
 - kemudian jika kita ingin menggunakannya di controller tambahkan class ini di headernya
 -> use Barryvdh\DomPDF\Facade\Pdf;
