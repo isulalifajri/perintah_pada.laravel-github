@@ -3,3 +3,6 @@ https://yajrabox.com/docs/laravel-datatables/10.0
 https://datatables.net/
 https://datatables.net/examples/styling/bootstrap5.html
 https://www.mynotescode.com/nomor-urut-datatables/
+
+n+1 problem
+https://stackoverflow.com/questions/65068417/datatables-how-to-preserve-id-when-sorting-through-a-relation-from-another-tabl
