@@ -3,3 +3,19 @@ dokumentasi : https://github.com/Midtrans/midtrans-php
 caranya:
 jalankan perintah ini di terminal : 
 composer require midtrans/midtrans-php
+
+buat file midtrans.php di folder config
+dan isi filenya seperti ini:
+<?php
+
+return [
+    'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
+    'client_key' => env('MIDTRANS_CLIENT_KEY'),
+    'server_key' => env('MIDTRANS_SERVER_KEY'),
+];
+
+kemudian di .env tambahkan ini
+# integrasi midtrans (sesuaikan dengan id dan key yang dipunya)
+MIDTRANS_MERCHANT_ID=G7205***
+MIDTRANS_CLIENT_KEY=SB-Mid-client-******
+MIDTRANS_SERVER_KEY=SB-Mid-server-mbpOys_****
