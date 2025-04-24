@@ -1,0 +1,5 @@
+dokumentasi : https://github.com/Midtrans/midtrans-php
+
+caranya:
+jalankan perintah ini di terminal : 
+composer require midtrans/midtrans-php
