@@ -170,5 +170,8 @@ Referensi Link :
 2. https://divisidev.com/post/laravel-activity-log
 3. https://spatie.be/docs/laravel-activitylog/v4/installation-and-setup
 
+//menambahkan laravel debugbar pada proyek laravel kita
+https://github.com/barryvdh/laravel-debugbar
+
 
 
